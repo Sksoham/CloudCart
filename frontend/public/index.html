@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="description" content="CloudCart - A modern full-stack e-commerce platform built on AWS Cloud. Shop electronics, fashion, books, and more." />
+    <meta name="keywords" content="CloudCart, e-commerce, online shopping, AWS, React, Node.js, MongoDB" />
+    <meta name="author" content="CloudCart Engineering Team" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="CloudCart - Shop Smarter on the Cloud" />
+    <meta property="og:description" content="Discover thousands of products at unbeatable prices. Powered by AWS." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CloudCart - Shop Smarter on the Cloud" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' fill='white' font-size='14' font-weight='bold' font-family='system-ui'%3ECC%3C/text%3E%3C/svg%3E" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>CloudCart - Shop Smarter on the Cloud</title>
+    <style>
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:system-ui,-apple-system,sans-serif;background:#f9fafb}
+      #root{min-height:100vh}
+      #initial-loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#f9fafb;z-index:9999;transition:opacity 0.3s ease}
+      #initial-loader .logo{width:56px;height:56px;background:#2563eb;border-radius:14px;display:flex;align-items:center;justify-content:center;color:white;font-size:20px;font-weight:800}
+      #initial-loader .brand{font-size:22px;font-weight:700;color:#111827}
+      #initial-loader .brand span{color:#2563eb}
+      #initial-loader .spinner{width:32px;height:32px;border:3px solid #e5e7eb;border-top-color:#2563eb;border-radius:50%;animation:spin 0.8s linear infinite}
+      @keyframes spin{to{transform:rotate(360deg)}}
+    </style>
+  </head>
+  <body>
+    <noscript>CloudCart requires JavaScript to be enabled in your browser.</noscript>
+    <div id="initial-loader">
+      <div class="logo">CC</div>
+      <div class="brand">Cloud<span>Cart</span></div>
+      <div class="spinner"></div>
+    </div>
+    <div id="root"></div>
+    <script>
+      window.addEventListener('DOMContentLoaded',function(){
+        var o=new MutationObserver(function(){
+          var r=document.getElementById('root');
+          if(r&&r.children.length>0){
+            var l=document.getElementById('initial-loader');
+            if(l){l.style.opacity='0';setTimeout(function(){l.remove()},300)}
+            o.disconnect();
+          }
+        });
+        o.observe(document.getElementById('root'),{childList:true});
+      });
+    </script>
+  </body>
+</html>
