@@ -1,7 +1,3 @@
-// models/Order.js
-// Order schema: represents a placed order, a snapshot of cart items at
-// checkout time, shipping details, and payment/order status tracking.
-
 const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema(
@@ -101,7 +97,7 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
-// Index to quickly fetch a user's order history sorted by most recent
+
 orderSchema.index({ user: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Order', orderSchema);

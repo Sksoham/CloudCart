@@ -1,6 +1,6 @@
-// middleware/authMiddleware.js
-// Authentication middleware: verifies JWT and attaches the user to req.user.
-// Authorization middleware: restricts routes to specific roles (e.g. admin).
+
+
+
 
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
@@ -15,11 +15,11 @@ const { ApiError } = require('./errorHandler');
 const protect = asyncHandler(async (req, res, next) => {
   let token;
 
-  // 1. Check Authorization header
+
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   }
-  // 2. Fallback to cookie (useful if frontend stores token in httpOnly cookie)
+
   else if (req.cookies && req.cookies.token) {
     token = req.cookies.token;
   }
@@ -29,10 +29,10 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    // Verify token signature and expiry
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Fetch the user fresh from DB (ensures deleted/deactivated users are blocked)
+
     const currentUser = await User.findById(decoded.id);
 
     if (!currentUser) {
@@ -43,7 +43,7 @@ const protect = asyncHandler(async (req, res, next) => {
       throw new ApiError('This user account has been deactivated.', 403);
     }
 
-    // If password was changed after token was issued, force re-login
+
     if (currentUser.changedPasswordAfter(decoded.iat)) {
       throw new ApiError('Password was recently changed. Please log in again.', 401);
     }

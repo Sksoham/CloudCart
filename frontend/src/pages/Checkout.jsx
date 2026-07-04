@@ -1,4 +1,4 @@
-// src/pages/Checkout.jsx
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';

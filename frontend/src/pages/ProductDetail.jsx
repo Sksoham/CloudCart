@@ -1,4 +1,4 @@
-// src/pages/ProductDetail.jsx
+
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productService } from '../services';
@@ -23,7 +23,7 @@ export default function ProductDetail() {
   const [adding, setAdding]       = useState(false);
   const [imgErr, setImgErr]       = useState(false);
 
-  // Review form
+
   const [rating, setRating]       = useState(0);
   const [comment, setComment]     = useState('');
   const [submitting, setSubmitting] = useState(false);

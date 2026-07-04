@@ -1,16 +1,9 @@
-// controllers/orderController.js
-// Handles order placement (from cart), user order history, single order
-// retrieval, and admin order/payment status management.
-
 const asyncHandler = require('express-async-handler');
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const { ApiError } = require('../middleware/errorHandler');
 
-// @desc    Place a new order from the current cart
-// @route   POST /api/orders
-// @access  Private
 const placeOrder = asyncHandler(async (req, res) => {
   const { shippingAddress, paymentMethod } = req.body;
 
@@ -23,7 +16,6 @@ const placeOrder = asyncHandler(async (req, res) => {
     throw new ApiError('Your cart is empty. Add items before placing an order.', 400);
   }
 
-  // Validate stock and build order items
   const orderItems = [];
   for (const item of cart.items) {
     const product = await Product.findById(item.product);
@@ -45,7 +37,7 @@ const placeOrder = asyncHandler(async (req, res) => {
     });
   }
 
-  // Price calculations
+  
   const itemsPrice = Number(
     orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)
   );
@@ -68,14 +60,12 @@ const placeOrder = asyncHandler(async (req, res) => {
     orderStatus: 'Processing',
   });
 
-  // Deduct stock
   for (const item of orderItems) {
     await Product.findByIdAndUpdate(item.product, {
       $inc: { stock: -item.quantity },
     });
   }
 
-  // Clear cart
   cart.items = [];
   await cart.save();
 
@@ -86,9 +76,6 @@ const placeOrder = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get logged-in user's orders
-// @route   GET /api/orders/my-orders
-// @access  Private
 const getMyOrders = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
@@ -112,9 +99,6 @@ const getMyOrders = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get a single order by id (owner or admin)
-// @route   GET /api/orders/:id
-// @access  Private
 const getOrderById = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id).populate('user', 'name email');
 
@@ -132,9 +116,6 @@ const getOrderById = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, order });
 });
 
-// @desc    Get all orders (admin)
-// @route   GET /api/orders
-// @access  Private/Admin
 const getAllOrders = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 15;
@@ -163,9 +144,6 @@ const getAllOrders = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update order status (admin)
-// @route   PUT /api/orders/:id/status
-// @access  Private/Admin
 const updateOrderStatus = asyncHandler(async (req, res) => {
   const { orderStatus, paymentStatus } = req.body;
 
@@ -203,9 +181,6 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, message: 'Order updated successfully', order: updatedOrder });
 });
 
-// @desc    Get admin dashboard summary stats
-// @route   GET /api/orders/stats
-// @access  Private/Admin
 const getOrderStats = asyncHandler(async (req, res) => {
   const [totalOrders, totalRevenue, pendingOrders, deliveredOrders] = await Promise.all([
     Order.countDocuments(),

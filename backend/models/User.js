@@ -1,8 +1,3 @@
-// models/User.js
-// User schema: handles customer and admin accounts.
-// Passwords are hashed with bcrypt before saving. JWT generation is
-// available as an instance method for use in the auth controller.
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -62,16 +57,16 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// --- Middleware: hash password before save ---
+
 userSchema.pre('save', async function (next) {
-  // Only hash the password if it has been modified (or is new)
+
   if (!this.isModified('password')) return next();
 
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
 
-    // Track when the password was changed (used to invalidate old JWTs if needed)
+
     if (!this.isNew) {
       this.passwordChangedAt = Date.now() - 1000;
     }
@@ -81,12 +76,12 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// --- Instance method: compare entered password with hashed password ---
+
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
 };
 
-// --- Instance method: generate signed JWT for this user ---
+
 userSchema.methods.getSignedJwtToken = function () {
   return jwt.sign(
     { id: this._id, role: this.role },
@@ -95,7 +90,7 @@ userSchema.methods.getSignedJwtToken = function () {
   );
 };
 
-// --- Instance method: check if password was changed after a given JWT timestamp ---
+
 userSchema.methods.changedPasswordAfter = function (jwtTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);

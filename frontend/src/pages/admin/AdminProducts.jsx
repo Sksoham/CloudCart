@@ -1,4 +1,4 @@
-// src/pages/admin/AdminProducts.jsx
+
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { productService } from '../../services';

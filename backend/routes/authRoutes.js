@@ -1,4 +1,3 @@
-// routes/authRoutes.js
 const express = require('express');
 const { body } = require('express-validator');
 const router = express.Router();
@@ -13,7 +12,7 @@ const {
 const { protect } = require('../middleware/authMiddleware');
 const validateRequest = require('../middleware/validateRequest');
 
-// POST /api/auth/register
+
 router.post(
   '/register',
   [
@@ -34,7 +33,7 @@ router.post(
   registerUser
 );
 
-// POST /api/auth/login
+
 router.post(
   '/login',
   [
@@ -50,13 +49,13 @@ router.post(
   loginUser
 );
 
-// POST /api/auth/logout
+
 router.post('/logout', protect, logoutUser);
 
-// GET /api/auth/me
+
 router.get('/me', protect, getMe);
 
-// PUT /api/auth/change-password
+
 router.put(
   '/change-password',
   protect,

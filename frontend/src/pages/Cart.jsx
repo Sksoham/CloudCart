@@ -1,4 +1,4 @@
-// src/pages/Cart.jsx
+
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 

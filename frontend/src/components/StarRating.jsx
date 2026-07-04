@@ -1,4 +1,3 @@
-// src/components/StarRating.jsx
 export default function StarRating({ rating = 0, max = 5, size = 'sm', onSelect, numReviews }) {
   const sizes = { sm: 'w-4 h-4', md: 'w-5 h-5', lg: 'w-6 h-6' };
 

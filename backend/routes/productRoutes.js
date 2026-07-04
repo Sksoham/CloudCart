@@ -1,4 +1,3 @@
-// routes/productRoutes.js
 const express = require('express');
 const { body } = require('express-validator');
 const router = express.Router();
@@ -41,25 +40,25 @@ const productValidation = [
     .isInt({ min: 0 }).withMessage('Stock must be a non-negative integer'),
 ];
 
-// GET /api/products
+
 router.get('/', getProducts);
 
-// GET /api/products/categories
+
 router.get('/categories', getCategories);
 
-// GET /api/products/:id
+
 router.get('/:id', getProductById);
 
-// POST /api/products  (admin only)
+
 router.post('/', protect, authorize('admin'), productValidation, validateRequest, createProduct);
 
-// PUT /api/products/:id  (admin only)
+
 router.put('/:id', protect, authorize('admin'), updateProduct);
 
-// DELETE /api/products/:id  (admin only)
+
 router.delete('/:id', protect, authorize('admin'), deleteProduct);
 
-// POST /api/products/:id/reviews  (logged-in users)
+
 router.post(
   '/:id/reviews',
   protect,

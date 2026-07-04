@@ -1,16 +1,8 @@
-// controllers/authController.js
-// Handles user registration, login, logout, current-user retrieval,
-// and password change. Uses express-async-handler so thrown errors
-// are automatically forwarded to the global error handler.
-
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const { ApiError } = require('../middleware/errorHandler');
 const { sendTokenResponse } = require('../utils/generateToken');
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -29,9 +21,6 @@ const registerUser = asyncHandler(async (req, res) => {
   sendTokenResponse(user, 201, res);
 });
 
-// @desc    Authenticate user & get token
-// @route   POST /api/auth/login
-// @access  Public
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -39,7 +28,6 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError('Please provide both email and password', 400);
   }
 
-  // Explicitly select password since schema has select:false by default
   const user = await User.findOne({ email }).select('+password');
 
   if (!user || !(await user.matchPassword(password))) {
@@ -53,9 +41,6 @@ const loginUser = asyncHandler(async (req, res) => {
   sendTokenResponse(user, 200, res);
 });
 
-// @desc    Log out current user (clears auth cookie)
-// @route   POST /api/auth/logout
-// @access  Private
 const logoutUser = asyncHandler(async (req, res) => {
   res.cookie('token', 'none', {
     expires: new Date(Date.now() + 5 * 1000),
@@ -68,11 +53,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get currently authenticated user's profile
-// @route   GET /api/auth/me
-// @access  Private
 const getMe = asyncHandler(async (req, res) => {
-  // req.user is attached by the protect middleware
+  
   const user = await User.findById(req.user._id);
 
   res.status(200).json({
@@ -81,9 +63,6 @@ const getMe = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Change password for the logged-in user
-// @route   PUT /api/auth/change-password
-// @access  Private
 const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 

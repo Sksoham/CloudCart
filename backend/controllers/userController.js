@@ -1,13 +1,7 @@
-// controllers/userController.js
-// Handles user profile self-service operations and admin user management.
-
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const { ApiError } = require('../middleware/errorHandler');
 
-// @desc    Update logged-in user's own profile (name, phone, address)
-// @route   PUT /api/users/profile
-// @access  Private
 const updateProfile = asyncHandler(async (req, res) => {
   const { name, phone, address } = req.body;
 
@@ -38,9 +32,9 @@ const updateProfile = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get all users (admin only)
-// @route   GET /api/users
-// @access  Private/Admin
+
+
+
 const getAllUsers = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 20;
@@ -72,9 +66,9 @@ const getAllUsers = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get a single user by id (admin only)
-// @route   GET /api/users/:id
-// @access  Private/Admin
+
+
+
 const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
@@ -88,9 +82,9 @@ const getUserById = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update a user's role or active status (admin only)
-// @route   PUT /api/users/:id
-// @access  Private/Admin
+
+
+
 const updateUserByAdmin = asyncHandler(async (req, res) => {
   const { role, isActive } = req.body;
 
@@ -115,9 +109,9 @@ const updateUserByAdmin = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Delete a user (admin only)
-// @route   DELETE /api/users/:id
-// @access  Private/Admin
+
+
+
 const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 

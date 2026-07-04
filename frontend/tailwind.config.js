@@ -1,4 +1,4 @@
-// tailwind.config.js
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -9,7 +9,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // CloudCart primary brand palette
+
         primary: {
           50:  '#eff6ff',
           100: '#dbeafe',
@@ -23,7 +23,7 @@ module.exports = {
           900: '#1e3a8a',
           950: '#172554',
         },
-        // Accent / CTA color
+
         accent: {
           50:  '#fff7ed',
           100: '#ffedd5',
@@ -36,7 +36,7 @@ module.exports = {
           800: '#9a3412',
           900: '#7c2d12',
         },
-        // Status / badge colors
+
         success: '#22c55e',
         warning: '#f59e0b',
         danger:  '#ef4444',

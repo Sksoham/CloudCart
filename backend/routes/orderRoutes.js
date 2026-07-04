@@ -1,4 +1,3 @@
-// routes/orderRoutes.js
 const express = require('express');
 const { body } = require('express-validator');
 const router = express.Router();
@@ -14,10 +13,10 @@ const {
 const { protect, authorize } = require('../middleware/authMiddleware');
 const validateRequest = require('../middleware/validateRequest');
 
-// All order routes require authentication
+
 router.use(protect);
 
-// POST /api/orders  — place a new order
+
 router.post(
   '/',
   [
@@ -33,19 +32,19 @@ router.post(
   placeOrder
 );
 
-// GET /api/orders/my-orders  — must be BEFORE /:id to avoid clash
+
 router.get('/my-orders', getMyOrders);
 
-// Admin-only stats — also before /:id
+
 router.get('/stats', authorize('admin'), getOrderStats);
 
-// GET /api/orders  — admin: all orders
+
 router.get('/', authorize('admin'), getAllOrders);
 
-// GET /api/orders/:id  — owner or admin
+
 router.get('/:id', getOrderById);
 
-// PUT /api/orders/:id/status  — admin: update order/payment status
+
 router.put('/:id/status', authorize('admin'), updateOrderStatus);
 
 module.exports = router;

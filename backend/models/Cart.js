@@ -1,8 +1,3 @@
-// models/Cart.js
-// Cart schema: one cart per user, holding an array of product line-items.
-// Quantity and price are stored on the cart item so totals can be computed
-// without re-querying the product collection on every read.
-
 const mongoose = require('mongoose');
 
 const cartItemSchema = new mongoose.Schema(
@@ -53,12 +48,12 @@ const cartSchema = new mongoose.Schema(
   }
 );
 
-// Virtual: total number of items (sum of quantities) in the cart
+
 cartSchema.virtual('totalItems').get(function () {
   return this.items.reduce((sum, item) => sum + item.quantity, 0);
 });
 
-// Virtual: total price of all items in the cart
+
 cartSchema.virtual('totalPrice').get(function () {
   return Number(
     this.items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)

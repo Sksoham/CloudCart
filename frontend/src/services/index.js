@@ -1,4 +1,4 @@
-// src/services/authService.js
+
 import api from './api';
 
 export const authService = {
@@ -9,7 +9,7 @@ export const authService = {
   changePassword: (data) => api.put('/auth/change-password', data),
 };
 
-// src/services/productService.js is merged below for single-file simplicity
+
 export const productService = {
   getProducts: (params) => api.get('/products', { params }),
   getCategories: () => api.get('/products/categories'),

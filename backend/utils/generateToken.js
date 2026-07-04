@@ -1,9 +1,3 @@
-// utils/generateToken.js
-// Shared utility for issuing a JWT for a given user and (optionally)
-// attaching it to the response as a secure httpOnly cookie.
-// Centralizing this logic keeps cookie flags consistent across
-// register/login/password-change flows.
-
 const jwt = require('jsonwebtoken');
 
 /**

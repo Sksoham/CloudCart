@@ -1,7 +1,7 @@
-// src/services/api.js
-// Central Axios instance used by every service module.
-// Automatically attaches the JWT from localStorage to every request
-// and handles 401 responses by redirecting to login.
+
+
+
+
 
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -17,8 +17,8 @@ const api = axios.create({
   timeout: 15000, // 15s timeout - important for cold EC2 starts
 });
 
-// ─── Request Interceptor ──────────────────────────────────────────────────
-// Attach the JWT token (stored in localStorage) to every outgoing request
+
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('cloudcart_token');
@@ -30,8 +30,8 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ─── Response Interceptor ─────────────────────────────────────────────────
-// Normalize error responses and handle expired sessions globally
+
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -40,7 +40,7 @@ api.interceptors.response.use(
       error.message ||
       'Something went wrong. Please try again.';
 
-    // 401: session expired or invalid token → force logout
+
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
       const publicPaths = ['/login', '/register', '/'];
@@ -53,12 +53,12 @@ api.interceptors.response.use(
       }
     }
 
-    // 403: insufficient permissions
+
     if (error.response?.status === 403) {
       toast.error('You do not have permission to perform this action.');
     }
 
-    // 500: server error
+
     if (error.response?.status >= 500) {
       toast.error('Server error. Please try again later.');
     }

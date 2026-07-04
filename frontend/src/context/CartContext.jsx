@@ -1,7 +1,7 @@
-// src/context/CartContext.jsx
-// Provides cart state and actions across the entire app.
-// Cart is fetched from the backend on login and kept in sync via API calls.
-// Guest users see an empty local cart; it syncs on next login.
+
+
+
+
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
@@ -16,15 +16,15 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart]           = useState({ items: [], totalItems: 0, totalPrice: 0 });
   const [cartLoading, setCartLoading] = useState(false);
 
-  // ── Fetch cart from backend whenever auth state changes ────────────────
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchCart();
     } else {
-      // Clear cart on logout
+
       setCart({ items: [], totalItems: 0, totalPrice: 0 });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [isAuthenticated]);
 
   const fetchCart = useCallback(async () => {
@@ -33,13 +33,13 @@ export const CartProvider = ({ children }) => {
       const { data } = await cartService.getCart();
       setCart(data.cart);
     } catch {
-      // Silently fail — cart simply stays empty
+
     } finally {
       setCartLoading(false);
     }
   }, []);
 
-  // ── Add item ───────────────────────────────────────────────────────────
+
   const addToCart = useCallback(async (productId, quantity = 1) => {
     if (!isAuthenticated) {
       toast.error('Please log in to add items to your cart.');
@@ -56,7 +56,7 @@ export const CartProvider = ({ children }) => {
     }
   }, [isAuthenticated]);
 
-  // ── Update quantity ────────────────────────────────────────────────────
+
   const updateQuantity = useCallback(async (productId, quantity) => {
     try {
       const { data } = await cartService.updateCartItem(productId, { quantity });
@@ -66,7 +66,7 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // ── Remove single item ─────────────────────────────────────────────────
+
   const removeFromCart = useCallback(async (productId) => {
     try {
       const { data } = await cartService.removeFromCart(productId);
@@ -77,17 +77,17 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // ── Clear entire cart ──────────────────────────────────────────────────
+
   const clearCart = useCallback(async () => {
     try {
       const { data } = await cartService.clearCart();
       setCart(data.cart);
     } catch {
-      // Silently handle
+
     }
   }, []);
 
-  // ── Derived helpers ────────────────────────────────────────────────────
+
   const cartCount = cart?.totalItems ?? cart?.items?.reduce((s, i) => s + i.quantity, 0) ?? 0;
   const cartTotal = cart?.totalPrice ??
     cart?.items?.reduce((s, i) => s + i.price * i.quantity, 0) ?? 0;

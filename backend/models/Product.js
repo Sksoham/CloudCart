@@ -1,7 +1,3 @@
-// models/Product.js
-// Product schema: represents items sold on CloudCart.
-// Includes text indexing for search, category filtering, and stock tracking.
-
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema(
@@ -111,13 +107,13 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-// Text index to support keyword search on title, description, and brand
+
 productSchema.index({ title: 'text', description: 'text', brand: 'text' });
 
-// Compound index to speed up category + price range filter queries
+
 productSchema.index({ category: 1, price: 1 });
 
-// Virtual field: returns true if stock is available
+
 productSchema.virtual('inStock').get(function () {
   return this.stock > 0;
 });
@@ -125,7 +121,7 @@ productSchema.virtual('inStock').get(function () {
 productSchema.set('toJSON', { virtuals: true });
 productSchema.set('toObject', { virtuals: true });
 
-// Recalculate average rating whenever reviews change
+
 productSchema.methods.recalculateRatings = function () {
   if (this.reviews.length === 0) {
     this.ratings = 0;

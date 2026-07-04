@@ -1,7 +1,7 @@
-// src/App.jsx
-// Defines the complete client-side route tree.
-// Protected routes redirect unauthenticated users to /login.
-// Admin routes additionally check the 'admin' role.
+
+
+
+
 
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
@@ -10,7 +10,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Loader from './components/Loader';
 
-// ── Lazy-loaded pages (code splitting for faster initial load) ─────────────
+
 const Home          = lazy(() => import('./pages/Home'));
 const Products      = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
@@ -23,14 +23,14 @@ const Register      = lazy(() => import('./pages/Register'));
 const Profile       = lazy(() => import('./pages/Profile'));
 const NotFound      = lazy(() => import('./pages/NotFound'));
 
-// Admin pages
+
 const AdminDashboard    = lazy(() => import('./pages/admin/Dashboard'));
 const AdminProducts     = lazy(() => import('./pages/admin/AdminProducts'));
 const AdminProductForm  = lazy(() => import('./pages/admin/AdminProductForm'));
 const AdminOrders       = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminUsers        = lazy(() => import('./pages/admin/AdminUsers'));
 
-// ── Route Guards ──────────────────────────────────────────────────────────
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return <Loader fullScreen />;
@@ -51,7 +51,7 @@ const GuestRoute = ({ children }) => {
   return isAuthenticated ? <Navigate to="/" replace /> : children;
 };
 
-// ── App Shell ─────────────────────────────────────────────────────────────
+
 export default function App() {
   return (
     <div className="flex flex-col min-h-screen">

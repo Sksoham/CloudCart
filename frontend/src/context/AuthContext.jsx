@@ -1,6 +1,6 @@
-// src/context/AuthContext.jsx
-// Provides authentication state and actions to the entire React tree.
-// Token and user are persisted in localStorage so state survives page refresh.
+
+
+
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken]     = useState(() => localStorage.getItem(TOKEN_KEY) || null);
   const [loading, setLoading] = useState(true); // true until initial /me check completes
 
-  // ── Persist helpers ────────────────────────────────────────────────────
+
   const persistAuth = (userData, jwtToken) => {
     setUser(userData);
     setToken(jwtToken);
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(USER_KEY);
   };
 
-  // ── On mount: re-validate the stored token with the backend ───────────
+
   useEffect(() => {
     const verifyToken = async () => {
       const storedToken = localStorage.getItem(TOKEN_KEY);
@@ -50,17 +50,17 @@ export const AuthProvider = ({ children }) => {
         const { data } = await authService.getMe();
         persistAuth(data.user, storedToken);
       } catch {
-        // Token invalid / expired → clear stale data
+
         clearAuth();
       } finally {
         setLoading(false);
       }
     };
     verifyToken();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
-  // ── Actions ────────────────────────────────────────────────────────────
+
   const register = useCallback(async (formData) => {
     const { data } = await authService.register(formData);
     persistAuth(data.user, data.token);
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await authService.logout();
     } catch {
-      // Ignore API errors on logout — always clear local state
+
     } finally {
       clearAuth();
       toast.success('Logged out successfully.');
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
   }, []);
 
-  // ── Derived flags ──────────────────────────────────────────────────────
+
   const isAuthenticated = Boolean(user && token);
   const isAdmin         = isAuthenticated && user?.role === 'admin';
 
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook for consuming the context
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

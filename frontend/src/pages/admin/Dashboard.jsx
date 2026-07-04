@@ -1,4 +1,4 @@
-// src/pages/admin/Dashboard.jsx
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { orderService, productService, userService } from '../../services';

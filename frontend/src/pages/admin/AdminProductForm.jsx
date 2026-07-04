@@ -1,4 +1,4 @@
-// src/pages/admin/AdminProductForm.jsx
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { productService } from '../../services';

@@ -1,8 +1,3 @@
-// utils/seeder.js
-// Run with: node utils/seeder.js
-// Optionally destroy all data: node utils/seeder.js --destroy
-// Reads MONGO_URI and admin credentials from .env
-
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const mongoose = require('mongoose');
@@ -177,7 +172,7 @@ const seedDB = async () => {
 
   console.log('Seeding database...');
 
-  // Create admin user
+
   const adminExists = await User.findOne({ email: process.env.ADMIN_EMAIL });
   if (!adminExists) {
     await User.create({
@@ -191,7 +186,7 @@ const seedDB = async () => {
     console.log('Admin user already exists, skipping.');
   }
 
-  // Create sample products
+
   const existingCount = await Product.countDocuments();
   if (existingCount === 0) {
     await Product.insertMany(sampleProducts);

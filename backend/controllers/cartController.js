@@ -1,16 +1,9 @@
-// controllers/cartController.js
-// Handles the logged-in user's shopping cart: view, add, update quantity,
-// remove item, and clear. Cart prices are snapshotted from the live
-// Product document at the time of adding, then re-validated against stock.
-
 const asyncHandler = require('express-async-handler');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const { ApiError } = require('../middleware/errorHandler');
 
-/**
- * Helper: fetch (or lazily create) the cart for the logged-in user.
- */
+
 const getOrCreateCart = async (userId) => {
   let cart = await Cart.findOne({ user: userId });
   if (!cart) {
@@ -19,9 +12,6 @@ const getOrCreateCart = async (userId) => {
   return cart;
 };
 
-// @desc    Get logged-in user's cart
-// @route   GET /api/cart
-// @access  Private
 const getCart = asyncHandler(async (req, res) => {
   const cart = await getOrCreateCart(req.user._id);
 
@@ -31,9 +21,6 @@ const getCart = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Add an item to the cart (or increase quantity if it already exists)
-// @route   POST /api/cart
-// @access  Private
 const addToCart = asyncHandler(async (req, res) => {
   const { productId, quantity = 1 } = req.body;
 
@@ -84,9 +71,6 @@ const addToCart = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update the quantity of an item already in the cart
-// @route   PUT /api/cart/:productId
-// @access  Private
 const updateCartItem = asyncHandler(async (req, res) => {
   const { quantity } = req.body;
   const { productId } = req.params;
@@ -121,9 +105,6 @@ const updateCartItem = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Remove a single item from the cart
-// @route   DELETE /api/cart/:productId
-// @access  Private
 const removeFromCart = asyncHandler(async (req, res) => {
   const { productId } = req.params;
 
@@ -144,9 +125,6 @@ const removeFromCart = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Clear all items from the cart (e.g. after order placement)
-// @route   DELETE /api/cart
-// @access  Private
 const clearCart = asyncHandler(async (req, res) => {
   const cart = await getOrCreateCart(req.user._id);
   cart.items = [];
