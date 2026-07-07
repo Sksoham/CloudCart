@@ -296,19 +296,6 @@ pm2 startup && pm2 save
 
 ---
 
-## Screenshots
-
-> Add actual screenshots here after deployment.
-
-| Page | Preview |
-|------|---------|
-| Home | ![Home](https://via.placeholder.com/600x400.png?text=Home+Page) |
-| Products | ![Products](https://via.placeholder.com/600x400.png?text=Products+Page) |
-| Admin Dashboard | ![Admin](https://via.placeholder.com/600x400.png?text=Admin+Dashboard) |
-| Cart | ![Cart](https://via.placeholder.com/600x400.png?text=Cart+Page) |
-| Dark Mode | ![Dark](https://via.placeholder.com/600x400.png?text=Dark+Mode) |
-
----
 
 ## Future Improvements
 
