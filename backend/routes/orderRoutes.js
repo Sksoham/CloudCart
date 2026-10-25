@@ -20,13 +20,10 @@ router.use(protect);
 router.post(
   '/',
   [
-    body('shippingAddress.fullName').notEmpty().withMessage('Full name is required'),
-    body('shippingAddress.phone').notEmpty().withMessage('Phone number is required'),
-    body('shippingAddress.street').notEmpty().withMessage('Street address is required'),
-    body('shippingAddress.city').notEmpty().withMessage('City is required'),
-    body('shippingAddress.state').notEmpty().withMessage('State is required'),
-    body('shippingAddress.postalCode').notEmpty().withMessage('Postal code is required'),
-    body('shippingAddress.country').notEmpty().withMessage('Country is required'),
+    body('customerName').isString().trim().isLength({ min: 2, max: 80 }).withMessage('Enter your name'),
+    body('customerPhone').isString().trim().matches(/^[+\d\s()-]{7,20}$/).withMessage('Enter a valid contact number'),
+    body('requestedDate').isISO8601().withMessage('Choose a pickup date'),
+    body('note').optional().isString().trim().isLength({ max: 500 }),
   ],
   validateRequest,
   placeOrder
@@ -45,6 +42,6 @@ router.get('/', authorize('admin'), getAllOrders);
 router.get('/:id', getOrderById);
 
 
-router.put('/:id/status', authorize('admin'), updateOrderStatus);
+router.put('/:id/status', updateOrderStatus);
 
 module.exports = router;

@@ -16,6 +16,7 @@ const reviewSchema = new mongoose.Schema(
 
 const productSchema = new mongoose.Schema(
   {
+    shop: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', index: true },
     title: {
       type: String,
       required: [true, 'Product title is required'],
@@ -76,6 +77,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Stock quantity is required'],
       min: [0, 'Stock cannot be negative'],
+      validate: { validator: Number.isInteger, message: 'Stock must be a whole number' },
       default: 0,
     },
     sku: {

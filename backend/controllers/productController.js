@@ -1,16 +1,28 @@
+const mongoose = require('mongoose');
 const asyncHandler = require('express-async-handler');
 const Product = require('../models/Product');
+const Shop = require('../models/Shop');
 const { ApiError } = require('../middleware/errorHandler');
 
 
 
 
 const getProducts = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 12;
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 12));
   const skip = (page - 1) * limit;
 
   const filter = { isActive: true };
+  if (req.query.shop) {
+    if (!mongoose.isValidObjectId(req.query.shop)) throw new ApiError('Invalid shop', 400);
+    filter.shop = new mongoose.Types.ObjectId(req.query.shop);
+  }
+  if (req.query.area) {
+    const escaped = String(req.query.area).slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const shops = await Shop.find({ $or: [{ area: new RegExp(escaped, 'i') }, { city: new RegExp(escaped, 'i') }] }).select('_id');
+    filter.shop = { $in: shops.map(s => s._id).filter(id => !req.query.shop || String(id) === req.query.shop) };
+  }
+  if (req.query.inStock === 'true') filter.stock = { $gt: 0 };
 
 
   if (req.query.keyword) {
@@ -24,19 +36,25 @@ const getProducts = asyncHandler(async (req, res) => {
 
 
   if (req.query.minPrice || req.query.maxPrice) {
-    filter.price = {};
-    if (req.query.minPrice) filter.price.$gte = Number(req.query.minPrice);
-    if (req.query.maxPrice) filter.price.$lte = Number(req.query.maxPrice);
+    const range = [];
+    for (const [key, op] of [['minPrice', '$gte'], ['maxPrice', '$lte']]) {
+      if (req.query[key] !== undefined && req.query[key] !== '') {
+        const value = Number(req.query[key]);
+        if (!Number.isFinite(value) || value < 0) throw new ApiError('Invalid price range.', 400);
+        range.push({ [op]: [{ $ifNull: ['$discountPrice', '$price'] }, value] });
+      }
+    }
+    filter.$expr = { $and: range };
   }
 
 
   let sortOption = { createdAt: -1 }; // default: newest first
   switch (req.query.sort) {
     case 'price_asc':
-      sortOption = { price: 1 };
+      sortOption = { effectivePrice: 1 };
       break;
     case 'price_desc':
-      sortOption = { price: -1 };
+      sortOption = { effectivePrice: -1 };
       break;
     case 'rating':
       sortOption = { ratings: -1 };
@@ -49,10 +67,11 @@ const getProducts = asyncHandler(async (req, res) => {
   }
 
   const [products, total] = await Promise.all([
-    Product.find(filter).sort(sortOption).skip(skip).limit(limit),
+    Product.aggregate([{ $match: filter }, { $addFields: { effectivePrice: { $ifNull: ['$discountPrice', '$price'] } } }, { $sort: { ...sortOption, _id: 1 } }, { $skip: skip }, { $limit: limit }]),
     Product.countDocuments(filter),
   ]);
 
+  await Product.populate(products, { path: 'shop', select: '-owner' });
   res.status(200).json({
     success: true,
     count: products.length,
@@ -75,7 +94,7 @@ const getCategories = asyncHandler(async (req, res) => {
 
 
 const getProductById = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id).populate(
+  const product = await Product.findById(req.params.id).populate('shop', '-owner').populate(
     'reviews.user',
     'name'
   );
@@ -91,6 +110,8 @@ const getProductById = asyncHandler(async (req, res) => {
 
 
 const createProduct = asyncHandler(async (req, res) => {
+  const shop = await Shop.findOne({ owner: req.user._id });
+  if (!shop) throw new ApiError('Create your shop profile before listing products.', 400);
   const { title, description, image, images, category, brand, price, discountPrice, stock, sku } =
     req.body;
 
@@ -110,6 +131,7 @@ const createProduct = asyncHandler(async (req, res) => {
     stock,
     sku,
     createdBy: req.user._id,
+    shop: shop._id,
   });
 
   res.status(201).json({
@@ -127,6 +149,9 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   if (!product) {
     throw new ApiError('Product not found', 404);
+  }
+  if (req.user.role !== 'admin' && !(await Shop.exists({ _id: product.shop, owner: req.user._id }))) {
+    throw new ApiError('You can only edit products from your own shop.', 403);
   }
 
   const updatableFields = [
@@ -166,6 +191,9 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
   if (!product) {
     throw new ApiError('Product not found', 404);
+  }
+  if (req.user.role !== 'admin' && !(await Shop.exists({ _id: product.shop, owner: req.user._id }))) {
+    throw new ApiError('You can only remove products from your own shop.', 403);
   }
 
 

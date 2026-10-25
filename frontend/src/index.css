@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 /* Google Fonts - Inter */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* System fonts keep the demo crisp and available offline. */
 
 /* ─── Base Styles ──────────────────────────────────────────── */
 @layer base {
@@ -136,3 +136,87 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
+
+.eyebrow { color: #e11d48; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.local-hero { background: #fafafa; border-bottom: 1px solid #e4e4e7; }
+.local-art { background: #ffe4e6; }
+.dark .local-hero { background: #101012; border-color: #303034; }
+
+/* Keep square media boxes even when the aspect-ratio plugin disables core utilities. */
+.aspect-square { aspect-ratio: 1 / 1; }
+/* CloudCart — the neighbourhood market */
+body { background: #fafafa; }
+:root { --market-ink: #18181b; --market-paper: #fafafa; --market-line: #e4e4e7; }
+.dark { --market-ink: #fafafa; --market-paper: #09090b; --market-line: #303034; }
+.dark body { background: #09090b; }
+::selection { background: #fda4af; color: #18181b; }
+a:focus-visible, button:focus-visible { outline: 3px solid #f43f5e; outline-offset: 4px; }
+.market-nav { background: #fafafaed; box-shadow: none; border-color: var(--market-line); }
+.dark .market-nav { background: #111113ed; }
+.market-ribbon { padding: 10px 24px; text-align: center; background: #18181b; color: #fff1f2; font-size: 12px; letter-spacing: .035em; }
+.market-ribbon span { margin-left: 36px; color: #fecdd3; }
+.local-hero { background: #f4f4f5; border-color: var(--market-line); overflow: hidden; }
+.hero-grid { padding-top: 70px; padding-bottom: 70px; }
+.market-headline { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(48px, 5.1vw, 76px); font-weight: 400; line-height: 1.04; letter-spacing: -.055em; color: var(--market-ink); margin-top: 24px; }
+.market-headline em { color: #be123c; font-weight: 400; }
+.eyebrow { color: #be123c; font-size: 10px; letter-spacing: .18em; }
+.market-search { padding: 12px; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 16px; box-shadow: 0 10px 28px #18181b09; }
+.market-search label { letter-spacing: .05em; font-size: 9px; font-weight: 700; color: #52525b; }
+.market-search .input { background: transparent; font-weight: 400; letter-spacing: 0; padding-left: 0; }
+.market-search .btn-primary { border-radius: 10px; }
+.local-art { background: #f4d9de; border-radius: 48% 48% 20px 20px; padding-top: 90px; padding-bottom: 32px; border: 1px solid #e8b9c3; transform: rotate(2deg); }
+.local-art svg { filter: drop-shadow(0 12px 8px #18181b10); }
+.local-art > div:first-child { letter-spacing: .12em; font-size: 9px; justify-content: center; gap: 30px; }
+.hero-scene { padding: 0 20px; }
+.local-stamp { position: absolute; right: 0; top: 5px; z-index: 1; background: #e11d48; color: #ffffff; width: 122px; height: 122px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 8px; letter-spacing: .1em; line-height: 1.4; transform: rotate(12deg); border: 1px dashed #fda4af; outline: 6px solid #e11d48; }
+.local-stamp strong { font: italic 20px Georgia, serif; letter-spacing: -.02em; }
+.hero-note { transform: rotate(-4deg); margin: 16px -28px -12px; border: 1px solid #e4e4e7; box-shadow: 0 12px 24px #18181b10; }
+.section-heading { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: clamp(26px, 3vw, 37px); letter-spacing: -.035em; line-height: 1.2; }
+.category-section { padding-top: 34px; }
+.category-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
+.category-heading > a { font-size: 12px; color: var(--market-ink); }
+.category-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.category-tile { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--market-line); border-radius: 14px; background: #ffffff; }
+.category-tile:hover { border-color: #e11d48; background: #fff1f2; }
+.category-tile img { width: 54px; height: 58px; border-radius: 10px; object-fit: cover; }
+.category-tile strong { display: block; font-size: 14px; }
+.category-tile div span { display: block; font-size: 11px; color: #71717a; margin-top: 3px; }
+.category-tile > span { margin-left: auto; color: #be123c; }
+.pickup-steps { border-top: 1px solid var(--market-line); border-bottom: 1px solid var(--market-line); padding: 28px 0; }
+.step-number { display: flex; flex-shrink: 0; width: 36px; height: 36px; align-items: center; justify-content: center; border: 1px solid #fecdd3; border-radius: 50%; color: #e11d48; font: italic 18px Georgia, serif; }
+.card { border: 1px solid var(--market-line); border-radius: 18px; box-shadow: 0 3px 10px #18181b04; }
+.card-hover:hover { box-shadow: 0 14px 30px #18181b10; }
+.product-card .card { padding: 8px; }
+.product-card .aspect-square { border-radius: 12px; }
+.product-card h3 { font-size: 16px; margin-top: 5px; }
+.product-card .p-4 { padding: 16px 10px 10px; }
+.product-add .btn { border-radius: 10px; background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+.product-add .btn:hover:not(:disabled) { background: #18181b; color: white; }
+.shop-card { position: relative; padding-top: 38px; }
+.shop-awning { position: absolute; top: 0; left: 0; right: 0; height: 13px; background: repeating-linear-gradient(90deg, #e11d48 0, #e11d48 22px, #ffe4e6 22px, #ffe4e6 44px); border-bottom: 3px solid #be123c; }
+.shop-card:nth-child(3n+2) .shop-awning { background: repeating-linear-gradient(90deg, #9f1239 0, #9f1239 22px, #fecdd3 22px, #fecdd3 44px); }
+.shop-card:nth-child(3n) .shop-awning { background: repeating-linear-gradient(90deg, #3f3f46 0, #3f3f46 22px, #d4d4d8 22px, #d4d4d8 44px); }
+.seller-banner { background-image: radial-gradient(circle at 90% 180%, transparent 39%, #ffffff0b 39.2%, #ffffff0b 40%, transparent 40.2%, transparent 49%, #ffffff0b 49.2%, #ffffff0b 50%, transparent 50.2%); }
+.btn { font-weight: 600; }
+footer { background: #f4f4f5; }
+.dark footer { background: #111113; }
+.dark .market-headline em { color: #fb7185; }
+.dark .eyebrow { color: #fb7185; }
+.dark .market-search, .dark .category-tile { background: #18181b; border-color: #3f3f46; }
+.dark .market-search label, .dark .category-tile div span { color: #a1a1aa; }
+.dark .category-tile:hover { background: #27272a; }
+.dark .product-add .btn { background: #3b101b; color: #ffe4e6; border-color: #881337; }
+.dark .text-primary-600 { color: #fb7185; }
+@media (max-width: 1023px) { .hero-grid { gap: 50px; padding-top: 45px; } .hero-scene { max-width: 460px; } .category-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 639px) { .market-ribbon { font-size: 10px; padding: 10px 12px; } .market-ribbon span { display: none; } .market-headline { font-size: 54px; } .hero-grid { padding-bottom: 45px; } .hero-scene { padding: 0 16px; } .local-art { padding-top: 72px; } .local-stamp { width: 100px; height: 100px; font-size: 7px; right: 12px; } .local-stamp strong { font-size: 18px; } .hero-note { margin-left: -15px; margin-right: -15px; font-size: 12px; } .category-tile { padding: 10px; gap: 8px; } .category-tile img { width: 38px; height: 48px; } .category-tile strong { font-size: 12px; } .category-tile div span { font-size: 10px; } .category-tile > span { display: none; } .category-heading { align-items: start; } .category-heading > a { max-width: 110px; text-align: right; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* Red accents on charcoal surfaces retain clear text and focus contrast. */
+.market-ribbon { background: #be123c; }
+.dark .market-nav { background: #111113ed; }
+.dark .local-art { background: #261b20; border-color: #552632; }
+.dark .local-art > div:first-child { color: #fda4af; }
+.dark .hero-note { background: #202023; border-color: #3f3f46; color: #fafafa; }
+.dark .hero-note .text-gray-500 { color: #a1a1aa; }
+.seller-banner { background-color: #991b36; }
+.dark .text-gray-500 { color: #a1a1aa; }

@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
 
-const ORDER_STATUSES   = ['Processing','Shipped','Out for Delivery','Delivered','Cancelled'];
+const ORDER_STATUSES   = ['Requested','Confirmed','Ready for pickup','Collected','Processing','Shipped','Out for Delivery','Delivered','Cancelled'];
 const PAYMENT_STATUSES = ['Pending','Paid','Failed','Refunded'];
 
 export default function AdminOrders() {
@@ -39,6 +39,10 @@ export default function AdminOrders() {
     try {
       const body = {};
       if (orderStatus)   body.orderStatus  = orderStatus;
+      if (orderStatus === 'Collected') {
+        body.pickupCode = window.prompt('Enter the pickup code after payment is received:');
+        if (!body.pickupCode) return;
+      }
       if (paymentStatus) body.paymentStatus = paymentStatus;
       await orderService.updateOrderStatus(orderId, body);
       toast.success('Order updated!');
@@ -98,7 +102,7 @@ export default function AdminOrders() {
                           </select>
                         </td>
                         <td className="px-5 py-3">
-                          <select value={order.paymentStatus} disabled={updating === order._id}
+                          <select value={order.paymentStatus} disabled={updating === order._id || order.fulfillment === "pickup"}
                             onChange={(e) => handleStatusUpdate(order._id, null, e.target.value)}
                             className="text-xs border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none">
                             {PAYMENT_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -117,7 +121,7 @@ export default function AdminOrders() {
                               {order.items.map((item, i) => (
                                 <div key={i} className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg p-2 shadow-sm text-xs">
                                   <img src={item.image} alt={item.title} className="w-8 h-8 rounded object-cover"
-                                    onError={(e) => { e.target.src = 'https://via.placeholder.com/32.png?text=CC'; }}/>
+                                    onError={(e) => { e.target.src = '/images/product-placeholder.svg'; }}/>
                                   <div>
                                     <p className="font-medium text-gray-900 dark:text-white line-clamp-1 max-w-[120px]">{item.title}</p>
                                     <p className="text-gray-400">Qty: {item.quantity}</p>
@@ -126,7 +130,7 @@ export default function AdminOrders() {
                               ))}
                             </div>
                             <p className="mt-2 text-xs text-gray-500">
-                              Ship to: {order.shippingAddress?.fullName}, {order.shippingAddress?.city}, {order.shippingAddress?.state}
+                              {order.fulfillment === "pickup" ? `Collect at: ${order.pickup?.shopName}, ${order.pickup?.area} · ${order.pickup?.requestedDate}` : `Ship to: ${order.shippingAddress?.fullName}, ${order.shippingAddress?.city}`}
                             </p>
                           </td>
                         </tr>

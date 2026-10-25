@@ -32,6 +32,7 @@ const cartItemSchema = new mongoose.Schema(
 
 const cartSchema = new mongoose.Schema(
   {
+    checkoutInProgress: { type: Boolean, default: false },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -45,6 +46,7 @@ const cartSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    optimisticConcurrency: true,
   }
 );
 

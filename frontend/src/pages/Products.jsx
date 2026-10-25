@@ -1,308 +1,34 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { productService } from '../services';
+import { productService, shopService } from '../services';
 import ProductCard from '../components/ProductCard';
 import Pagination from '../components/Pagination';
 import Loader from '../components/Loader';
-
-const CATEGORIES = [
-  'All',
-  'Electronics',
-  'Fashion',
-  'Home & Kitchen',
-  'Books',
-  'Beauty & Personal Care',
-  'Sports & Outdoors',
-  'Toys & Games',
-  'Grocery',
-  'Other',
-];
-
-const SORT_OPTIONS = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'price_asc', label: 'Price: Low to High' },
-  { value: 'price_desc', label: 'Price: High to Low' },
-  { value: 'rating', label: 'Top Rated' },
-];
-
+const categories = ['All','Electronics','Fashion','Home & Kitchen','Books','Beauty & Personal Care','Sports & Outdoors','Toys & Games','Grocery','Other'];
 export default function Products() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [shops, setShops] = useState([]);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
-
-  const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
-  const [category, setCategory] = useState(searchParams.get('category') || 'All');
-  const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
-  const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
-  const [sort, setSort] = useState(searchParams.get('sort') || 'newest');
-  const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
-
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-
-    try {
-      const params = {
-        page,
-        limit: 12,
-        sort,
-      };
-
-      if (keyword) params.keyword = keyword;
-      if (category !== 'All') params.category = category;
-      if (minPrice) params.minPrice = minPrice;
-      if (maxPrice) params.maxPrice = maxPrice;
-
-      console.log("REQUEST PARAMS:", params);
-
-      const response = await productService.getProducts(params);
-
-      console.log("FULL RESPONSE:", response);
-      console.log("RESPONSE DATA:", response.data);
-
-      setProducts(response.data.products || []);
-      setTotal(response.data.total || 0);
-      setPages(response.data.pages || 1);
-    } catch (error) {
-      console.error("PRODUCT FETCH ERROR:", error);
-
-      if (error.response) {
-        console.error("Status:", error.response.status);
-        console.error("Response:", error.response.data);
-      }
-
-      setProducts([]);
-      setTotal(0);
-      setPages(1);
-    } finally {
-      setLoading(false);
-    }
-  }, [keyword, category, minPrice, maxPrice, sort, page]);
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const query = params.toString();
+  const page = Math.max(1, Number(params.get('page')) || 1);
+  const update = (key, value) => { const next = new URLSearchParams(params); if (value) next.set(key, value); else next.delete(key); if (key !== 'page') next.delete('page'); setParams(next, { replace: true }); };
+  useEffect(() => { shopService.list().then(({ data }) => setShops(data.shops)).catch(() => {}); }, []);
   useEffect(() => {
-    fetchProducts();
-
-    const params = {};
-
-    if (keyword) params.keyword = keyword;
-    if (category !== 'All') params.category = category;
-    if (minPrice) params.minPrice = minPrice;
-    if (maxPrice) params.maxPrice = maxPrice;
-    if (sort !== 'newest') params.sort = sort;
-    if (page > 1) params.page = page;
-
-    setSearchParams(params, { replace: true });
-  }, [
-    fetchProducts,
-    keyword,
-    category,
-    minPrice,
-    maxPrice,
-    sort,
-    page,
-    setSearchParams,
-  ]);
-
-  const go = (setter) => (value) => {
-    setter(value);
-    setPage(1);
-  };
-
-  const clearFilters = () => {
-    setKeyword('');
-    setCategory('All');
-    setMinPrice('');
-    setMaxPrice('');
-    setSort('newest');
-    setPage(1);
-  };
-
-  const hasActiveFilters =
-    keyword || category !== 'All' || minPrice || maxPrice;
-
-  const FilterPanel = () => (
-    <aside className="space-y-6">
-      <div>
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">
-          Category
-        </h3>
-
-        <div className="space-y-1">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => go(setCategory)(cat)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                category === cat
-                  ? 'bg-primary-600 text-white font-medium'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wide">
-          Price Range (INR)
-        </h3>
-
-        <div className="flex gap-2">
-          <input
-            type="number"
-            placeholder="Min"
-            value={minPrice}
-            onChange={(e) => go(setMinPrice)(e.target.value)}
-            className="input w-1/2"
-            min="0"
-          />
-
-          <input
-            type="number"
-            placeholder="Max"
-            value={maxPrice}
-            onChange={(e) => go(setMaxPrice)(e.target.value)}
-            className="input w-1/2"
-            min="0"
-          />
-        </div>
-      </div>
-
-      {hasActiveFilters && (
-        <button
-          onClick={clearFilters}
-          className="btn-secondary w-full text-sm"
-        >
-          Clear All Filters
-        </button>
-      )}
-    </aside>
-  );
-
-  return (
-    <div className="container-custom py-8 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="page-title">
-            {category !== 'All'
-              ? category
-              : keyword
-              ? `Results for "${keyword}"`
-              : 'All Products'}
-          </h1>
-
-          {!loading && (
-            <p className="text-sm text-gray-500 mt-1">
-              {total} product{total !== 1 ? 's' : ''} found
-            </p>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            className="sm:hidden btn-secondary btn-sm"
-            onClick={() => setMobileFilterOpen((p) => !p)}
-          >
-            {mobileFilterOpen ? 'Hide Filters' : 'Filters'}
-          </button>
-
-          <select
-            value={sort}
-            onChange={(e) => go(setSort)(e.target.value)}
-            className="input w-auto text-sm"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="mb-6 max-w-lg">
-        <input
-          type="text"
-          value={keyword}
-          onChange={(e) => go(setKeyword)(e.target.value)}
-          placeholder="Search products..."
-          className="input w-full"
-        />
-      </div>
-
-      <div className="flex gap-8">
-        <div className="hidden sm:block w-52 flex-shrink-0">
-          <FilterPanel />
-        </div>
-
-        {mobileFilterOpen && (
-          <div
-            className="sm:hidden fixed inset-0 z-40 bg-black/50"
-            onClick={() => setMobileFilterOpen(false)}
-          >
-            <div
-              className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-gray-900 p-6 overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="font-bold text-gray-900 dark:text-white">
-                  Filters
-                </h2>
-
-                <button
-                  onClick={() => setMobileFilterOpen(false)}
-                  className="btn-ghost p-1"
-                >
-                  X
-                </button>
-              </div>
-
-              <FilterPanel />
-            </div>
-          </div>
-        )}
-
-        <div className="flex-1 min-w-0">
-          {loading ? (
-            <Loader />
-          ) : products.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-5xl mb-4">🔍</div>
-
-              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                No products found
-              </h3>
-
-              <p className="text-gray-500 mb-6">
-                Try adjusting your filters or search term.
-              </p>
-
-              <button onClick={clearFilters} className="btn-primary">
-                Clear Filters
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {products.map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                ))}
-              </div>
-
-              <Pagination
-                page={page}
-                pages={pages}
-                onPageChange={setPage}
-              />
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+    let active = true; setLoading(true); setError('');
+    const timer = setTimeout(() => {
+      productService.getProducts({ ...Object.fromEntries(new URLSearchParams(query)), limit: 12 })
+        .then(({ data }) => { if (active) { setProducts(data.products); setTotal(data.total); setPages(data.pages); } })
+        .catch(e => { if (active) setError(e.message); })
+        .finally(() => { if (active) setLoading(false); });
+    }, 250);
+    return () => { active = false; clearTimeout(timer); };
+  }, [query]);
+  return <div className="container-custom py-10"><p className="eyebrow">DISCOVER WHAT’S AROUND YOU</p><h1 className="page-title mt-2">Explore local products</h1><p className="text-gray-500 mt-2 mb-8">Find your favourite, choose a shop, and collect in person.</p>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 card p-5 mb-8"><label className="label">Search products<input className="input mt-2" placeholder="What do you need?" value={params.get('keyword') || ''} onChange={e => update('keyword', e.target.value)} /></label><label className="label">Area or city<input className="input mt-2" placeholder="e.g. Kothrud, Pune" value={params.get('area') || ''} onChange={e => update('area', e.target.value)} /></label><label className="label">Shop<select className="input mt-2" value={params.get('shop') || ''} onChange={e => update('shop', e.target.value)}><option value="">All shops</option>{shops.map(s => <option key={s._id} value={s._id}>{s.name} — {s.area}</option>)}</select></label><label className="label">Category<select className="input mt-2" value={params.get('category') || 'All'} onChange={e => update('category', e.target.value === 'All' ? '' : e.target.value)}>{categories.map(c => <option key={c}>{c}</option>)}</select></label><label className="label">Minimum price (₹)<input type="number" min="0" className="input mt-2" value={params.get('minPrice') || ''} onChange={e => update('minPrice', e.target.value)} /></label><label className="label">Maximum price (₹)<input type="number" min="0" className="input mt-2" value={params.get('maxPrice') || ''} onChange={e => update('maxPrice', e.target.value)} /></label><label className="label">Sort by<select className="input mt-2" value={params.get('sort') || 'newest'} onChange={e => update('sort', e.target.value)}><option value="newest">Newest first</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option><option value="rating">Top rated</option></select></label><div className="flex flex-col justify-end gap-2"><label className="text-sm flex gap-2 items-center"><input type="checkbox" checked={params.get('inStock') === 'true'} onChange={e => update('inStock', e.target.checked ? 'true' : '')} />In stock only</label><button className="btn-ghost" onClick={() => setParams({})}>Clear filters</button></div></div>
+    {loading ? <Loader /> : error ? <p role="alert" className="text-red-600">{error}</p> : <><p className="text-sm text-gray-500 mb-5">{total} products found · One shop per pickup order</p>{!products.length ? <div className="text-center py-16"><h2>No local finds just yet</h2><p className="text-gray-500 mt-3">Try a different area, category, or price range.</p><button className="btn-primary mt-5" onClick={() => setParams({})}>Clear filters</button></div> : <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">{products.map(p => <ProductCard key={p._id} product={p} />)}</div>}<Pagination page={page} pages={pages} onPageChange={p => update('page', String(p))} /></>}
+  </div>;
 }

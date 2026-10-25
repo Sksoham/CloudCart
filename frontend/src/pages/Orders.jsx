@@ -10,7 +10,8 @@ const fmt = (n) =>
 
 const statusBadge = (status) => {
   const map = {
-    Processing:       'badge-blue',
+    Requested: 'badge-blue', Confirmed: 'badge-blue', 'Ready for pickup': 'badge-yellow', Collected: 'badge-green',
+    Processing: 'badge-blue',
     Shipped:          'badge-yellow',
     'Out for Delivery':'badge-yellow',
     Delivered:        'badge-green',
@@ -49,7 +50,7 @@ export default function Orders() {
 
   return (
     <div className="container-custom py-10 animate-fade-in">
-      <h1 className="page-title mb-2">My Orders</h1>
+      <h1 className="page-title mb-2">My pickup orders</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">{total} order{total !== 1 ? 's' : ''} total</p>
 
       {orders.length === 0 ? (
@@ -79,13 +80,14 @@ export default function Orders() {
                   </div>
                 </div>
 
+                <p className="text-sm text-primary-600 mb-3">{order.pickup?.shopName} {order.pickup?.requestedDate && `· Pickup requested: ${order.pickup.requestedDate}`}</p>
                 {/* Items preview */}
                 <div className="flex gap-3 mb-4 overflow-x-auto pb-1 no-scrollbar">
                   {order.items.slice(0, 4).map((item, i) => (
                     <div key={i} className="flex-shrink-0 flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-2 text-xs">
                       <img src={item.image} alt={item.title}
                         className="w-10 h-10 object-cover rounded-md flex-shrink-0"
-                        onError={(e) => { e.target.src = 'https://via.placeholder.com/40.png?text=CC'; }}/>
+                        onError={(e) => { e.target.src = '/images/product-placeholder.svg'; }}/>
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white line-clamp-1 max-w-[100px]">{item.title}</p>
                         <p className="text-gray-500">Qty: {item.quantity}</p>
@@ -102,7 +104,7 @@ export default function Orders() {
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-sm font-bold text-gray-900 dark:text-white">{fmt(order.totalPrice)}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">via {order.paymentMethod}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">{order.fulfillment === 'pickup' ? 'Pay at shop' : order.paymentMethod}</span>
                   </div>
                   <Link to={`/orders/${order._id}`} className="btn-secondary btn-sm">
                     View Details →

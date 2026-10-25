@@ -203,6 +203,48 @@ REACT_APP_API_URL=http://localhost:5000
 
 ## Running Locally
 
+### Docker Desktop (Windows)
+
+Start Docker Desktop with the Linux engine enabled. From this repository's root
+(the folder containing this README, `backend`, and `frontend`), run:
+
+```powershell
+.\start-docker.ps1
+```
+
+The script finds Docker Desktop even if `docker` is not on PATH, builds the app,
+waits for all three services to be healthy, and adds the demo admin and 12 products
+if they are absent. Existing users, orders, and products are preserved.
+
+- Storefront: http://localhost:3000
+- API health through Nginx: http://localhost:3000/api/health
+- Direct API: http://localhost:5000/api/health
+- Demo admin: `admin@cloudcart.com` / `Admin@1234` (unless overridden)
+
+The optional, ignored `.env.docker` file overrides Compose's local defaults. It
+supports `MONGO_ROOT_USERNAME`, `MONGO_ROOT_PASSWORD`, `JWT_SECRET`, `ADMIN_EMAIL`,
+and `ADMIN_PASSWORD`. MongoDB credentials in the connection URI must be URL-safe.
+These defaults are for a local demo; the published ports are bound to localhost.
+
+If Docker is on PATH, the equivalent commands are:
+
+```powershell
+docker compose --env-file .env.docker up --build -d --wait
+docker compose --env-file .env.docker exec -T backend npm run seed
+docker compose ps
+docker compose logs --tail 100
+docker compose down
+```
+
+Omit `--env-file .env.docker` if that optional file does not exist. MongoDB data is
+stored in the `cloudcart_mongo-data` volume and survives `docker compose down`.
+Avoid `down -v` unless you intend to delete that data. After editing source files,
+run the start script again to rebuild. Docker Desktop shows the services together
+under the **cloudcart** project. If a port is already occupied, stop the app using
+it before starting CloudCart.
+
+### Without Docker
+
 ```bash
 # Terminal 1 — Backend
 cd backend
@@ -333,3 +375,65 @@ pm2 startup && pm2 save
 MIT License — see LICENSE for details.
 
 > Built as a cloud computing internship portfolio project demonstrating full-stack development, REST API design, React architecture, AWS deployment, and DevOps automation.
+
+
+## CloudCart Local marketplace demo
+
+CloudCart now supports local sellers and in-person collection: discover a product,
+reserve it online, wait for the seller to prepare it, and pay at the shop.
+
+- `/shops`: browse public shop profiles, neighbourhoods, addresses and pickup hours.
+- `/products`: search by product, area/city, shop, category, final selling price and stock.
+- `/seller`: any registered customer can create a shop profile and become a seller.
+  Sellers manage only their own listings and pickup orders.
+- `/checkout`: one shop per basket; customer name, phone, preferred pickup date and
+  optional note. No delivery charge or online payment. Listed prices are final.
+- `/orders`: follow Requested -> Confirmed -> Ready for pickup -> Collected.
+  The seller enters the customer's pickup code after receiving payment.
+  Customers may cancel before an order is ready; sellers may cancel before collection.
+  Cancellation releases reserved inventory once. Stock reservation uses conditional
+  database updates to prevent selling the same last unit twice.
+
+Start Docker Desktop, then run from this project directory in PowerShell:
+
+```powershell
+.\start-docker.ps1
+```
+
+Open http://localhost:3000. The seed is additive: it retains existing customers,
+orders, edited products and stock, attaches unassigned sample products to demo shops,
+and adds four everyday products. Existing delivery orders remain readable.
+
+Demo sellers (password `Seller@1234`, unless overridden when first seeded):
+
+| Email | Shop | Sample area |
+| --- | --- | --- |
+| seller@cloudcart.com | Neighbourhood Essentials | Kothrud, Pune |
+| techseller@cloudcart.com | Corner Tech & Books | Shivajinagar, Pune |
+| styleseller@cloudcart.com | The Local Lifestyle Store | Baner, Pune |
+
+These shops have sample addresses and are visibly labelled Demo. They are not real
+businesses. Register a customer account to demonstrate ordering. To demonstrate
+both roles together, use separate normal/private browser sessions.
+
+### Verification
+
+```powershell
+npm run build --prefix frontend
+npm run test:marketplace --prefix backend
+```
+
+The integration suite creates an isolated temporary MongoDB database. It checks
+onboarding, ownership/authorization, filtering, single-shop baskets, current prices,
+pickup transitions and codes, cancellation, and last-unit stock contention. On this
+Windows setup it can reuse the installed MongoDB 6.0.14 test binary; Docker uses
+MongoDB 7. If no test binary is cached, mongodb-memory-server downloads MongoDB 7.0.14.
+
+### Demo scope
+
+Pickup dates are preferences, not reserved appointment slots. Order status is
+refreshed in the app; SMS/email notifications and online payments are not integrated.
+Location discovery uses typed area/city names rather than GPS distance. Product
+photos are entered as URLs. Production work still includes verified sellers,
+secure deployment credentials, and transaction/recovery handling across database
+writes if a process fails during checkout or cancellation.

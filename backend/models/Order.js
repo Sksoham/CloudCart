@@ -30,6 +30,14 @@ const shippingAddressSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
+    fulfillment: { type: String, enum: ['delivery', 'pickup'], default: 'delivery' },
+    shop: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', index: true },
+    seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+    pickup: {
+      shopName: String, address: String, area: String, city: String,
+      shopPhone: String, hours: String, customerName: String, customerPhone: String,
+      requestedDate: String, note: String, code: String,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -45,11 +53,11 @@ const orderSchema = new mongoose.Schema(
     },
     shippingAddress: {
       type: shippingAddressSchema,
-      required: true,
+      required: function () { return this.fulfillment !== 'pickup'; },
     },
     paymentMethod: {
       type: String,
-      enum: ['COD', 'CARD', 'UPI'],
+      enum: ['COD', 'CARD', 'UPI', 'PAY_AT_SHOP'],
       default: 'COD',
     },
     itemsPrice: {
@@ -82,7 +90,7 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ['Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'],
+      enum: ['Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Requested', 'Confirmed', 'Ready for pickup', 'Collected'],
       default: 'Processing',
     },
     deliveredAt: {

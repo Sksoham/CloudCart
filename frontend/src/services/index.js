@@ -44,3 +44,12 @@ export const userService = {
   updateUser: (id, data) => api.put(`/users/${id}`, data),
   deleteUser: (id) => api.delete(`/users/${id}`),
 };
+
+export const shopService = {
+  list: () => api.get('/shops'),
+  get: (id) => api.get(`/shops/${id}`),
+  mine: () => api.get('/shops/mine'),
+  save: (data) => api.put('/shops/mine', data),
+  products: () => api.get('/shops/mine/products'),
+  orders: () => api.get('/shops/mine/orders'),
+};

@@ -16,12 +16,12 @@ const connectDB = async () => {
       family: 4,
     });
 
-    console.log(`MongoDB Atlas Connected: ${conn.connection.host}`);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
 
     return conn;
   } catch (error) {
     console.error(`MongoDB Connection Error: ${error.message}`);
-    
+    throw error;
   }
 };
 

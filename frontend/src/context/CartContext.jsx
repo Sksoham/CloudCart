@@ -17,16 +17,6 @@ export const CartProvider = ({ children }) => {
   const [cartLoading, setCartLoading] = useState(false);
 
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    } else {
-
-      setCart({ items: [], totalItems: 0, totalPrice: 0 });
-    }
-
-  }, [isAuthenticated]);
-
   const fetchCart = useCallback(async () => {
     try {
       setCartLoading(true);
@@ -39,6 +29,16 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCart();
+    } else {
+
+      setCart({ items: [], totalItems: 0, totalPrice: 0 });
+    }
+
+  }, [isAuthenticated, fetchCart]);
 
   const addToCart = useCallback(async (productId, quantity = 1) => {
     if (!isAuthenticated) {

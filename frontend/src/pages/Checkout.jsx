@@ -1,225 +1,46 @@
-
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { orderService } from '../services';
-import toast from 'react-hot-toast';
+import { useCart } from '../context/CartContext';
+import { orderService, productService } from '../services';
+import ShopCard from '../components/ShopCard';
+import Loader from '../components/Loader';
 
-const fmt = (n) =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
-
-const PAYMENT_METHODS = [
-  { value: 'COD',  label: 'Cash on Delivery', icon: '💵' },
-  { value: 'UPI',  label: 'UPI Payment',       icon: '📱' },
-  { value: 'CARD', label: 'Credit / Debit Card',icon: '💳' },
-];
-
+const money = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(n);
+const indiaDate = n => new Date(Date.now() + n * 86400000).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 export default function Checkout() {
-  const navigate = useNavigate();
-  const { cart, clearCart } = useCart();
   const { user } = useAuth();
-
-  const items    = cart?.items || [];
-  const subtotal = cart?.totalPrice ?? items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const shipping = subtotal > 499 ? 0 : 49;
-  const tax      = Number((subtotal * 0.18).toFixed(2));
-  const total    = Number((subtotal + shipping + tax).toFixed(2));
-
-  const [address, setAddress] = useState({
-    fullName:   user?.name || '',
-    phone:      user?.phone || '',
-    street:     user?.address?.street || '',
-    city:       user?.address?.city || '',
-    state:      user?.address?.state || '',
-    postalCode: user?.address?.postalCode || '',
-    country:    user?.address?.country || 'India',
-  });
-  const [paymentMethod, setPaymentMethod] = useState('COD');
-  const [errors, setErrors]   = useState({});
-  const [placing, setPlacing] = useState(false);
-
-  const validate = () => {
-    const e = {};
-    if (!address.fullName.trim())   e.fullName   = 'Full name is required';
-    if (!address.phone.trim())      e.phone      = 'Phone number is required';
-    if (!address.street.trim())     e.street     = 'Street address is required';
-    if (!address.city.trim())       e.city       = 'City is required';
-    if (!address.state.trim())      e.state      = 'State is required';
-    if (!address.postalCode.trim()) e.postalCode = 'Postal code is required';
-    if (!address.country.trim())    e.country    = 'Country is required';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleChange = (field) => (e) => {
-    setAddress((a) => ({ ...a, [field]: e.target.value }));
-    if (errors[field]) setErrors((er) => ({ ...er, [field]: '' }));
-  };
-
-  const handlePlaceOrder = async () => {
-    if (!validate()) { toast.error('Please fill in all required fields'); return; }
-    if (items.length === 0) { toast.error('Your cart is empty'); return; }
-
-    setPlacing(true);
+  const { cart, cartLoading, fetchCart } = useCart();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ customerName: user?.name || '', customerPhone: user?.phone || '', requestedDate: indiaDate(0), note: '' });
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (cartLoading) return;
+    let active = true;
+    Promise.all((cart?.items || []).map(i => productService.getProductById(i.product)))
+      .then(values => { if (active) setProducts(values.map(v => v.data.product)); })
+      .catch(e => { if (active) setError(e.message); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [cart, cartLoading]);
+  const shop = products[0]?.shop;
+  const singleShop = shop && products.every(p => p.shop?._id === shop._id);
+  const items = cart?.items || [];
+  const total = products.reduce((sum, p) => sum + (p.discountPrice ?? p.price) * (items.find(i => i.product === p._id)?.quantity || 0), 0);
+  const submit = async e => {
+    e.preventDefault(); setBusy(true); setError('');
     try {
-      const { data } = await orderService.placeOrder({
-        shippingAddress: address,
-        paymentMethod,
-      });
-      await clearCart();
-      toast.success('Order placed successfully! 🎉');
+      const { data } = await orderService.placeOrder(form);
       navigate(`/orders/${data.order._id}`, { replace: true });
-    } catch (err) {
-      toast.error(err.message || 'Failed to place order. Please try again.');
-    } finally {
-      setPlacing(false);
-    }
+      await fetchCart();
+    } catch (e) { setError(e.message); setBusy(false); }
   };
-
-  if (items.length === 0) {
-    return (
-      <div className="container-custom py-24 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Your cart is empty</h2>
-        <Link to="/products" className="btn-primary btn-lg">Shop Now</Link>
-      </div>
-    );
-  }
-
-  const Field = ({ label, field, type = 'text', placeholder, half }) => (
-    <div className={half ? 'col-span-1' : 'col-span-2'}>
-      <label className="label">{label}</label>
-      <input
-        type={type}
-        value={address[field]}
-        onChange={handleChange(field)}
-        placeholder={placeholder}
-        className={`input ${errors[field] ? 'input-error' : ''}`}
-      />
-      {errors[field] && <p className="mt-1 text-xs text-red-500">{errors[field]}</p>}
-    </div>
-  );
-
-  return (
-    <div className="container-custom py-10 animate-fade-in">
-      <h1 className="page-title mb-8">Checkout</h1>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: Address + Payment */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Shipping Address */}
-          <div className="card p-6">
-            <h2 className="font-bold text-lg text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-              <span className="w-7 h-7 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
-              Shipping Address
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Full Name *"     field="fullName"   placeholder="John Doe" />
-              <Field label="Phone Number *"  field="phone"      placeholder="+91 98765 43210" type="tel" />
-              <Field label="Street Address *" field="street"   placeholder="123, MG Road, Apartment 4B" />
-              <Field label="City *"          field="city"       placeholder="Mumbai" half />
-              <Field label="State *"         field="state"      placeholder="Maharashtra" half />
-              <Field label="Postal Code *"   field="postalCode" placeholder="400001" half />
-              <Field label="Country *"       field="country"    placeholder="India" half />
-            </div>
-          </div>
-
-          {/* Payment Method */}
-          <div className="card p-6">
-            <h2 className="font-bold text-lg text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-              <span className="w-7 h-7 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-              Payment Method
-            </h2>
-            <div className="space-y-3">
-              {PAYMENT_METHODS.map((pm) => (
-                <label
-                  key={pm.value}
-                  className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${
-                    paymentMethod === pm.value
-                      ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value={pm.value}
-                    checked={paymentMethod === pm.value}
-                    onChange={() => setPaymentMethod(pm.value)}
-                    className="text-primary-600"
-                  />
-                  <span className="text-xl">{pm.icon}</span>
-                  <span className="font-medium text-gray-900 dark:text-white text-sm">{pm.label}</span>
-                  {pm.value === 'COD' && (
-                    <span className="ml-auto badge badge-green">Recommended</span>
-                  )}
-                </label>
-              ))}
-            </div>
-            {paymentMethod !== 'COD' && (
-              <p className="mt-3 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
-                ⚠️ This is a demo project. No actual payment will be charged. Order will be marked as paid automatically.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Right: Order summary */}
-        <div className="lg:col-span-1">
-          <div className="card p-6 sticky top-24">
-            <h2 className="font-bold text-lg text-gray-900 dark:text-white mb-4">Order Summary</h2>
-
-            {/* Items */}
-            <div className="space-y-3 mb-5 max-h-52 overflow-y-auto pr-1">
-              {items.map((item) => (
-                <div key={item.product} className="flex gap-3">
-                  <img src={item.image} alt={item.title}
-                    className="w-12 h-12 rounded-lg object-cover bg-gray-100 flex-shrink-0"
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/48.png?text=CC'; }}/>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-900 dark:text-white line-clamp-1">{item.title}</p>
-                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                  </div>
-                  <p className="text-xs font-semibold text-gray-900 dark:text-white flex-shrink-0">{fmt(item.price * item.quantity)}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2 text-sm">
-              <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>Subtotal</span><span>{fmt(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>Shipping</span>
-                <span className={shipping === 0 ? 'text-green-600 font-medium' : ''}>{shipping === 0 ? 'FREE' : fmt(shipping)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>GST (18%)</span><span>{fmt(tax)}</span>
-              </div>
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between font-bold text-gray-900 dark:text-white">
-                <span>Total</span><span className="text-lg">{fmt(total)}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handlePlaceOrder}
-              disabled={placing}
-              className="btn-accent w-full btn-lg mt-5"
-            >
-              {placing ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>
-                  Placing Order…
-                </span>
-              ) : `Place Order — ${fmt(total)}`}
-            </button>
-
-            <p className="text-xs text-center text-gray-400 mt-3">
-              🔒 Your payment info is encrypted and secure
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  if (loading || cartLoading) return <Loader />;
+  if (!items.length) return <div className="container-custom py-20 text-center"><h1 className="page-title">Your pickup basket is empty</h1><Link to="/products" className="btn-primary mt-6">Explore local products</Link></div>;
+  return <div className="container-custom py-10"><Link to="/cart" className="text-sm text-primary-600">← Back to basket</Link><h1 className="page-title mt-4">Reserve your pickup</h1><p className="text-gray-500 mt-2 mb-8">No online payment. Your seller will confirm availability and prepare your order.</p>
+    <div className="grid lg:grid-cols-2 gap-8"><form onSubmit={submit} className="card p-6 space-y-5"><h2>Your pickup details</h2>{error && <p role="alert" className="text-red-600">{error}</p>}{!singleShop && <p role="alert" className="text-red-600">Your basket must contain products from one shop. Return to your basket and remove items from other shops.</p>}<label className="label">Full name<input className="input mt-2" required minLength={2} maxLength={80} value={form.customerName} onChange={e => setForm({ ...form, customerName: e.target.value })} /></label><label className="label">Contact number<input className="input mt-2" type="tel" required minLength={7} maxLength={20} value={form.customerPhone} onChange={e => setForm({ ...form, customerPhone: e.target.value })} /></label><label className="label">Preferred pickup date<input className="input mt-2" type="date" required min={indiaDate(0)} max={indiaDate(7)} value={form.requestedDate} onChange={e => setForm({ ...form, requestedDate: e.target.value })} /></label><label className="label">Note to the seller (optional)<textarea className="input mt-2" rows={3} maxLength={500} placeholder="For example: I would like to collect after 5 pm." value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} /></label><p className="text-sm text-gray-500">The date is a request, not a guaranteed time slot. Check your order status and wait for “Ready for pickup” before visiting.</p><button disabled={busy || !singleShop || !products.length} className="btn-primary w-full btn-lg">{busy ? 'Reserving…' : `Place pickup order · ${money(total)}`}</button></form>
+    <div className="space-y-5">{shop && <ShopCard shop={shop} />}<div className="card p-6"><h2 className="mb-5">Your order</h2>{products.map(p => { const quantity = items.find(i => i.product === p._id)?.quantity || 0; return <div className="flex justify-between gap-3 text-sm py-3 border-b border-gray-100 dark:border-gray-800" key={p._id}><span>{quantity} × {p.title}</span><span className="shrink-0">{money((p.discountPrice ?? p.price) * quantity)}</span></div>; })}<div className="flex justify-between mt-5 text-sm"><span>Pickup fee</span><span className="text-primary-600">Free</span></div><div className="flex justify-between mt-4 text-xl font-bold"><span>Pay at shop</span><span>{money(total)}</span></div><p className="text-xs text-gray-500 mt-4">Listed prices are the final product prices. No shipping charge or additional checkout tax is added. Prices and stock are checked again when you place the order.</p></div></div></div></div>;
 }

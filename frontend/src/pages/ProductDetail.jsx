@@ -1,3 +1,4 @@
+import ShopCard from '../components/ShopCard';
 
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -46,7 +47,7 @@ export default function ProductDetail() {
   if (loading) return <Loader fullScreen />;
   if (!product) return null;
 
-  const effectivePrice   = product.discountPrice || product.price;
+  const effectivePrice   = product.discountPrice ?? product.price;
   const discountPercent  = product.discountPrice
     ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
     : null;
@@ -102,7 +103,7 @@ export default function ProductDetail() {
         <div className="space-y-3">
           <div className="aspect-square rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800">
             <img
-              src={imgErr ? 'https://via.placeholder.com/600x600.png?text=CloudCart' : product.image}
+              src={imgErr ? '/images/product-placeholder.svg' : product.image}
               alt={product.title}
               onError={() => setImgErr(true)}
               className="w-full h-full object-cover"
@@ -152,6 +153,8 @@ export default function ProductDetail() {
             {product.description}
           </p>
 
+          {product.shop && <ShopCard shop={product.shop} />}
+          <p className="text-sm text-primary-600">Reserve online. Wait for the seller to confirm, then collect and pay at the shop.</p>
           {/* Quantity + Add to Cart */}
           {product.stock > 0 && (
             <div className="flex items-center gap-4 pt-2">
@@ -164,8 +167,8 @@ export default function ProductDetail() {
               </div>
 
               <button
-                onClick={handleAddToCart}
-                disabled={adding || alreadyInCart}
+                onClick={() => alreadyInCart ? navigate('/cart') : handleAddToCart()}
+                disabled={adding}
                 className={`flex-1 btn btn-lg ${alreadyInCart ? 'bg-green-600 text-white cursor-default' : 'btn-primary'}`}
               >
                 {adding ? (

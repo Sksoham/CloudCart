@@ -35,6 +35,11 @@ const errorHandler = (err, req, res, next) => {
   let message = err.message || 'Internal Server Error';
 
 
+  if (err.name === 'VersionError') {
+    statusCode = 409;
+    message = 'Your basket changed during this request. Refresh and try again.';
+  }
+
   if (err.name === 'CastError') {
     statusCode = 404;
     message = `Resource not found with id: ${err.value}`;

@@ -50,13 +50,13 @@ router.get('/categories', getCategories);
 router.get('/:id', getProductById);
 
 
-router.post('/', protect, authorize('admin'), productValidation, validateRequest, createProduct);
+router.post('/', protect, authorize('admin', 'seller'), productValidation, validateRequest, createProduct);
 
 
-router.put('/:id', protect, authorize('admin'), updateProduct);
+router.put('/:id', protect, authorize('admin', 'seller'), updateProduct);
 
 
-router.delete('/:id', protect, authorize('admin'), deleteProduct);
+router.delete('/:id', protect, authorize('admin', 'seller'), deleteProduct);
 
 
 router.post(

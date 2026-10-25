@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -20,9 +21,14 @@ const orderRoutes = require('./routes/orderRoutes');
 // =======================
 // Connect Database
 // =======================
-connectDB();
+connectDB().catch(() => process.exit(1));
 
 const app = express();
+
+// Docker serves the API through one Nginx proxy.
+if (process.env.TRUST_PROXY === '1') {
+  app.set('trust proxy', 1);
+}
 
 // =======================
 // Security
@@ -33,8 +39,10 @@ app.use(helmet());
 // Allowed Origins
 // =======================
 const allowedOrigins = [
+  process.env.CLIENT_URL,
   'http://cloudcart-frontend-sksoham.s3-website-us-east-1.amazonaws.com',
   'http://localhost:3000',
+  'http://127.0.0.1:3000',
 ];
 
 // =======================
@@ -131,9 +139,10 @@ if (process.env.NODE_ENV === 'development') {
 // Health Route
 // =======================
 app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'CloudCart API is running',
+  const databaseConnected = mongoose.connection.readyState === 1;
+  res.status(databaseConnected ? 200 : 503).json({
+    success: databaseConnected,
+    message: databaseConnected ? 'CloudCart API is running' : 'Database unavailable',
     environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString(),
   });
@@ -147,6 +156,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/shops', require('./routes/shopRoutes'));
 
 // =======================
 // Error Handlers

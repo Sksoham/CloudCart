@@ -7,6 +7,7 @@ const Product = require('../models/Product');
 const Cart = require('../models/Cart');
 const Order = require('../models/Order');
 const connectDB = require('../config/db');
+const extraProducts = require('./extraProducts');
 
 const sampleProducts = [
   {
@@ -173,11 +174,12 @@ const seedDB = async () => {
   console.log('Seeding database...');
 
 
-  const adminExists = await User.findOne({ email: process.env.ADMIN_EMAIL });
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@cloudcart.com';
+  const adminExists = await User.findOne({ email: adminEmail });
   if (!adminExists) {
     await User.create({
       name: process.env.ADMIN_NAME || 'CloudCart Admin',
-      email: process.env.ADMIN_EMAIL || 'admin@cloudcart.com',
+      email: adminEmail,
       password: process.env.ADMIN_PASSWORD || 'Admin@1234',
       role: 'admin',
     });
@@ -187,14 +189,19 @@ const seedDB = async () => {
   }
 
 
-  const existingCount = await Product.countDocuments();
-  if (existingCount === 0) {
-    await Product.insertMany(sampleProducts);
-    console.log(`${sampleProducts.length} products seeded.`);
-  } else {
-    console.log(`${existingCount} products already exist, skipping product seed.`);
+  const catalog = [...sampleProducts, ...extraProducts];
+  let added = 0;
+  // Add only missing SKUs. Preserve edited prices, stock, reviews, and inactive listings.
+  for (const product of catalog) {
+    const existing = await Product.exists({ sku: product.sku });
+    if (!existing) {
+      await Product.create(product);
+      added++;
+    }
   }
+  console.log(`${added} products added; ${await Product.countDocuments()} products in the catalog.`);
 
+  await require('./seedMarketplace')();
   console.log('Database seeded successfully!');
   process.exit(0);
 };

@@ -9,6 +9,7 @@ const getOrCreateCart = async (userId) => {
   if (!cart) {
     cart = await Cart.create({ user: userId, items: [] });
   }
+  if (cart.checkoutInProgress) throw new ApiError('Checkout is in progress. Please wait.', 409);
   return cart;
 };
 
@@ -27,7 +28,7 @@ const addToCart = asyncHandler(async (req, res) => {
   if (!productId) {
     throw new ApiError('Product id is required', 400);
   }
-  if (quantity < 1) {
+  if (!Number.isInteger(quantity) || quantity < 1) {
     throw new ApiError('Quantity must be at least 1', 400);
   }
 
@@ -42,8 +43,13 @@ const addToCart = asyncHandler(async (req, res) => {
 
   const cart = await getOrCreateCart(req.user._id);
 
+  if (!product.shop) throw new ApiError('This product does not have a pickup shop yet.', 400);
+  const otherProducts = await Product.find({ _id: { $in: cart.items.map(i => i.product) } }).select('shop');
+  if (otherProducts.some(p => String(p.shop) !== String(product.shop))) {
+    throw new ApiError('Your cart contains items from another shop. Complete that pickup order or clear your cart first.', 409);
+  }
   const existingItem = cart.items.find((item) => item.product.toString() === productId);
-  const effectivePrice = product.discountPrice || product.price;
+  const effectivePrice = product.discountPrice ?? product.price;
 
   if (existingItem) {
     const newQuantity = existingItem.quantity + quantity;
@@ -75,7 +81,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
   const { quantity } = req.body;
   const { productId } = req.params;
 
-  if (!quantity || quantity < 1) {
+  if (!Number.isInteger(quantity) || quantity < 1) {
     throw new ApiError('Quantity must be at least 1', 400);
   }
 

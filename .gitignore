@@ -4,6 +4,8 @@ node_modules/
 
 # Environment files (NEVER commit real .env)
 .env
+.env.docker
+**/.env.docker
 backend/.env
 frontend/.env
 frontend/.env.local
@@ -42,3 +44,6 @@ backend/coverage/
 # Misc
 *.pem
 *.key
+
+# Local browser verification screenshots and scripts
+output/

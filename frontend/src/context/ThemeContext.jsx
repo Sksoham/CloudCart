@@ -7,14 +7,14 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext(null);
 
-const THEME_KEY = 'cloudcart_theme';
+const THEME_KEY = 'cloudcart_theme_red_black';
 
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
     const stored = localStorage.getItem(THEME_KEY);
     if (stored) return stored === 'dark';
 
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return true;
   });
 
   useEffect(() => {

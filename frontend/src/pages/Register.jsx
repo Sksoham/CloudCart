@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const strengthLabel = (pwd) => {
@@ -19,6 +19,7 @@ const strengthLabel = (pwd) => {
 export default function Register() {
   const { register } = useAuth();
   const navigate      = useNavigate();
+  const location = useLocation();
 
   const [form, setForm]     = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [errors, setErrors] = useState({});
@@ -54,7 +55,7 @@ export default function Register() {
     setLoading(true);
     try {
       await register({ name: form.name.trim(), email: form.email, password: form.password });
-      navigate('/', { replace: true });
+      navigate(location.state?.from?.pathname || '/', { replace: true });
     } catch (err) {
       setApiError(err.message || 'Registration failed. Please try again.');
     } finally {

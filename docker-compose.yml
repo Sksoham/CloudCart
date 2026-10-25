@@ -1,0 +1,71 @@
+name: cloudcart
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-cloudcart123}
+      MONGO_INITDB_DATABASE: cloudcart
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand('ping').ok ? 0 : 1)"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGO_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-cloudcart123}@mongo:27017/cloudcart?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-cloudcart_local_development_only_change_before_deploying}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      JWT_COOKIE_EXPIRES_IN: ${JWT_COOKIE_EXPIRES_IN:-7}
+      CLIENT_URL: http://localhost:3000
+      TRUST_PROXY: "1"
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@cloudcart.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@1234}
+      ADMIN_NAME: ${ADMIN_NAME:-CloudCart Admin}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Empty means same-origin /api requests, forwarded by Nginx.
+        REACT_APP_API_URL: ""
+        REACT_APP_NAME: CloudCart
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mongo-data:

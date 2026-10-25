@@ -31,18 +31,18 @@ export default function ProductCard({ product }) {
   const alreadyInCart = isInCart(product._id);
 
   return (
-    <Link to={`/products/${product._id}`} className="group block">
+    <article className="group product-card">
       <div className="card-hover flex flex-col h-full">
 
         {/* Image container */}
         <div className="relative aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden">
-          <img
-            src={imgErr ? 'https://via.placeholder.com/400x400.png?text=CloudCart' : product.image}
+          <Link to={`/products/${product._id}`} className="block h-full" tabIndex={-1} aria-hidden="true"><img
+            src={imgErr ? '/images/product-placeholder.svg' : product.image}
             alt={product.title}
             onError={() => setImgErr(true)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
-          />
+          /></Link>
 
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -54,12 +54,51 @@ export default function ProductCard({ product }) {
             )}
           </div>
 
-          {/* Quick Add overlay on hover */}
-          <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+
+        </div>
+
+        {/* Info */}
+        <div className="p-4 flex flex-col flex-1 gap-1">
+          <span className="text-xs text-primary-600 dark:text-primary-400 font-medium uppercase tracking-wide">
+            {product.category}
+          </span>
+
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug">
+            <Link to={`/products/${product._id}`}>{product.title}</Link>
+          </h3>
+
+          {product.brand && product.brand !== 'Generic' && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">{product.brand}</p>
+          )}
+
+          {product.shop && <p className="text-xs text-primary-600 mt-2">{product.shop.name} · {product.shop.area}</p>}
+          <p className="text-xs text-gray-500">Collect in store · Pay at pickup</p>
+          {product.numReviews > 0 && <StarRating rating={product.ratings} numReviews={product.numReviews} />}
+
+          {/* Price */}
+          <div className="flex items-baseline gap-2 mt-auto pt-2">
+            <span className="text-base font-bold text-gray-900 dark:text-white">
+              {formatPrice(product.discountPrice ?? product.price)}
+            </span>
+            {product.discountPrice && (
+              <span className="text-xs text-gray-400 line-through">
+                {formatPrice(product.price)}
+              </span>
+            )}
+          </div>
+
+          {/* Stock warning */}
+          {product.stock > 0 && product.stock <= 5 && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+              Only {product.stock} left!
+            </p>
+          )}
+          {/* Keep the purchase action separate from the product link. */}
+          <div className="product-add mt-4">
             <button
               onClick={handleAddToCart}
               disabled={adding || product.stock === 0 || alreadyInCart}
-              className={`w-full btn text-sm py-2 ${
+              className={`w-full btn text-sm py-2.5 ${
                 alreadyInCart
                   ? 'bg-green-600 text-white cursor-default'
                   : 'btn-primary'
@@ -80,43 +119,7 @@ export default function ProductCard({ product }) {
             </button>
           </div>
         </div>
-
-        {/* Info */}
-        <div className="p-4 flex flex-col flex-1 gap-1">
-          <span className="text-xs text-primary-600 dark:text-primary-400 font-medium uppercase tracking-wide">
-            {product.category}
-          </span>
-
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug">
-            {product.title}
-          </h3>
-
-          {product.brand && product.brand !== 'Generic' && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">{product.brand}</p>
-          )}
-
-          <StarRating rating={product.ratings} numReviews={product.numReviews} />
-
-          {/* Price */}
-          <div className="flex items-baseline gap-2 mt-auto pt-2">
-            <span className="text-base font-bold text-gray-900 dark:text-white">
-              {formatPrice(product.discountPrice || product.price)}
-            </span>
-            {product.discountPrice && (
-              <span className="text-xs text-gray-400 line-through">
-                {formatPrice(product.price)}
-              </span>
-            )}
-          </div>
-
-          {/* Stock warning */}
-          {product.stock > 0 && product.stock <= 5 && (
-            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-              Only {product.stock} left!
-            </p>
-          )}
-        </div>
       </div>
-    </Link>
+    </article>
   );
 }

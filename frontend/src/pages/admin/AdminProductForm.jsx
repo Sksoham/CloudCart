@@ -137,7 +137,7 @@ export default function AdminProductForm() {
               {preview && (
                 <div className="mt-4 aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800">
                   <img src={preview} alt="Preview" className="w-full h-full object-cover"
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/300x300.png?text=Invalid+URL'; }}/>
+                    onError={(e) => { e.target.src = '/images/product-placeholder.svg'; }}/>
                 </div>
               )}
             </div>

@@ -3,14 +3,17 @@
 
 
 
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Loader from './components/Loader';
+import AdminLayout from './components/AdminLayout';
 
 
+const Shops = lazy(() => import('./pages/Shops'));
+const Seller = lazy(() => import('./pages/Seller'));
 const Home          = lazy(() => import('./pages/Home'));
 const Products      = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
@@ -33,16 +36,24 @@ const AdminUsers        = lazy(() => import('./pages/admin/AdminUsers'));
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <Loader fullScreen />;
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  return isAuthenticated ? children : <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <Loader fullScreen />;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!isAdmin) return <Navigate to="/" replace />;
-  return children;
+  if (!isAuthenticated) return <Navigate to="/admin/login" state={{ from: location }} replace />;
+  if (!isAdmin) return (
+    <div className="container-custom py-16 text-center">
+      <h1 className="page-title">Administrator access required</h1>
+      <p className="my-4 text-gray-500">Your customer account cannot access store management.</p>
+      <Link to="/admin/login" className="btn-primary">Sign in with an admin account</Link>
+    </div>
+  );
+  return <AdminLayout>{children}</AdminLayout>;
 };
 
 const GuestRoute = ({ children }) => {
@@ -64,6 +75,9 @@ export default function App() {
             <Route path="/products"       element={<Products />} />
             <Route path="/products/:id"   element={<ProductDetail />} />
 
+            <Route path="/shops" element={<Shops />} />
+            <Route path="/shops/:id" element={<Shops />} />
+            <Route path="/seller" element={<ProtectedRoute><Seller /></ProtectedRoute>} />
             {/* Guest only */}
             <Route path="/login"    element={<GuestRoute><Login /></GuestRoute>} />
             <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
@@ -76,6 +90,7 @@ export default function App() {
             <Route path="/profile"  element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
             {/* Admin */}
+            <Route path="/admin/login"            element={<Login adminMode />} />
             <Route path="/admin"                  element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/products"         element={<AdminRoute><AdminProducts /></AdminRoute>} />
             <Route path="/admin/products/new"     element={<AdminRoute><AdminProductForm /></AdminRoute>} />

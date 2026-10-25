@@ -62,9 +62,9 @@ export default function Navbar() {
     }`;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm">
+    <nav className="market-nav sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm">
       <div className="container-custom">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
 
           {/* ── Logo ── */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
@@ -77,9 +77,11 @@ export default function Navbar() {
           </Link>
 
           {/* ── Desktop Nav Links ── */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-6">
             <NavLink to="/"        className={navLinkClass} end>Home</NavLink>
-            <NavLink to="/products" className={navLinkClass}>Products</NavLink>
+            <NavLink to="/products" className={navLinkClass}>Explore products</NavLink>
+            <NavLink to="/shops" className={navLinkClass}>Local shops</NavLink>
+            <NavLink to="/seller" className={navLinkClass}>{user?.role === "seller" ? "Seller dashboard" : "Sell locally"}</NavLink>
             {isAuthenticated && (
               <NavLink to="/orders" className={navLinkClass}>My Orders</NavLink>
             )}
@@ -121,7 +123,7 @@ export default function Navbar() {
 
             {/* Auth section */}
             {isAuthenticated ? (
-              <div className="relative hidden md:block">
+              <div className="relative hidden lg:block">
                 <button
                   onClick={() => setUserMenuOpen((p) => !p)}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
@@ -170,7 +172,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <div className="hidden md:flex items-center gap-2">
+              <div className="hidden lg:flex items-center gap-2">
                 <Link to="/login"    className="btn-secondary btn-sm">Login</Link>
                 <Link to="/register" className="btn-primary btn-sm">Sign Up</Link>
               </div>
@@ -179,7 +181,7 @@ export default function Navbar() {
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen((p) => !p)}
-              className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileOpen ? <XIcon /> : <MenuIcon />}
@@ -190,10 +192,12 @@ export default function Navbar() {
 
       {/* ── Mobile Menu ── */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 animate-slide-down">
+        <div className="lg:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 animate-slide-down">
           <div className="container-custom py-4 flex flex-col gap-3">
             <NavLink to="/"         onClick={() => setMobileOpen(false)} className={navLinkClass} end>Home</NavLink>
-            <NavLink to="/products" onClick={() => setMobileOpen(false)} className={navLinkClass}>Products</NavLink>
+            <NavLink to="/products" onClick={() => setMobileOpen(false)} className={navLinkClass}>Explore products</NavLink>
+            <NavLink to="/shops" onClick={() => setMobileOpen(false)} className={navLinkClass}>Local shops</NavLink>
+            <NavLink to="/seller" onClick={() => setMobileOpen(false)} className={navLinkClass}>Sell locally / Seller dashboard</NavLink>
             {isAuthenticated && <>
               <NavLink to="/orders"  onClick={() => setMobileOpen(false)} className={navLinkClass}>My Orders</NavLink>
               <NavLink to="/profile" onClick={() => setMobileOpen(false)} className={navLinkClass}>My Profile</NavLink>

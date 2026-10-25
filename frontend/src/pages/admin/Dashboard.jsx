@@ -38,6 +38,7 @@ export default function Dashboard() {
   const [productCount, setProductCount] = useState(0);
   const [userCount, setUserCount]       = useState(0);
   const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -50,10 +51,17 @@ export default function Dashboard() {
       setRecentOrders(o.data.orders);
       setProductCount(p.data.total);
       setUserCount(u.data.total);
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch((err) => setError(err.message || 'Unable to load the dashboard.')).finally(() => setLoading(false));
   }, []);
 
   if (loading) return <Loader />;
+  if (error) return (
+    <div className="container-custom py-10" role="alert">
+      <h1 className="page-title">Dashboard unavailable</h1>
+      <p className="my-4 text-red-600 dark:text-red-400">{error}</p>
+      <button className="btn-primary" onClick={() => window.location.reload()}>Try again</button>
+    </div>
+  );
 
   return (
     <div className="container-custom py-10 animate-fade-in">
@@ -119,8 +127,8 @@ export default function Dashboard() {
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Order Fulfillment</h3>
             <div className="space-y-3">
               {[
-                { label: 'Delivered',  value: stats?.deliveredOrders ?? 0, color: 'bg-green-500' },
-                { label: 'Processing', value: stats?.pendingOrders   ?? 0, color: 'bg-blue-500'  },
+                { label: 'Completed',  value: stats?.deliveredOrders ?? 0, color: 'bg-green-500' },
+                { label: 'Pending', value: stats?.pendingOrders   ?? 0, color: 'bg-blue-500'  },
               ].map(({ label, value, color }) => {
                 const pct = stats?.totalOrders ? Math.round((value / stats.totalOrders) * 100) : 0;
                 return (

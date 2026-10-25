@@ -86,7 +86,7 @@ export default function AdminProducts() {
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
                           <img src={p.image} alt={p.title} className="w-10 h-10 rounded-lg object-cover bg-gray-100 flex-shrink-0"
-                            onError={(e) => { e.target.src = 'https://via.placeholder.com/40.png?text=CC'; }}/>
+                            onError={(e) => { e.target.src = '/images/product-placeholder.svg'; }}/>
                           <div className="min-w-0">
                             <p className="font-medium text-gray-900 dark:text-white line-clamp-1 text-xs">{p.title}</p>
                             <p className="text-xs text-gray-400 font-mono">{p._id.slice(-6)}</p>

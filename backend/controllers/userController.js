@@ -93,8 +93,8 @@ const updateUserByAdmin = asyncHandler(async (req, res) => {
     throw new ApiError('User not found', 404);
   }
 
-  if (role && !['user', 'admin'].includes(role)) {
-    throw new ApiError("Role must be either 'user' or 'admin'", 400);
+  if (role && !['user', 'seller', 'admin'].includes(role)) {
+    throw new ApiError("Role must be user, seller or admin", 400);
   }
 
   if (role) user.role = role;

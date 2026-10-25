@@ -11,8 +11,8 @@ export default function Cart() {
 
   const items     = cart?.items || [];
   const subtotal  = cart?.totalPrice ?? items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const shipping  = subtotal > 499 ? 0 : 49;
-  const tax       = Number((subtotal * 0.18).toFixed(2));
+  const shipping  = 0;
+  const tax       = 0;
   const total     = Number((subtotal + shipping + tax).toFixed(2));
 
   if (cartLoading) {
@@ -54,7 +54,7 @@ export default function Cart() {
                   src={item.image}
                   alt={item.title}
                   className="w-24 h-24 object-cover rounded-lg bg-gray-100"
-                  onError={(e) => { e.target.src = 'https://via.placeholder.com/96x96.png?text=CC'; }}
+                  onError={(e) => { e.target.src = '/images/product-placeholder.svg'; }}
                 />
               </Link>
 
@@ -104,7 +104,7 @@ export default function Cart() {
         {/* Order summary */}
         <div className="lg:col-span-1">
           <div className="card p-6 sticky top-24">
-            <h2 className="font-bold text-lg text-gray-900 dark:text-white mb-5">Order Summary</h2>
+            <h2 className="font-bold text-lg text-gray-900 dark:text-white mb-5">Pickup Summary</h2><p className="text-sm text-gray-500 mb-4">One shop per order. Final prices are checked at checkout. Pay the seller when you collect.</p>
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
@@ -112,14 +112,14 @@ export default function Cart() {
                 <span>{fmt(subtotal)}</span>
               </div>
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>Shipping</span>
+                <span>Pickup fee</span>
                 <span className={shipping === 0 ? 'text-green-600 font-medium' : ''}>{shipping === 0 ? 'FREE' : fmt(shipping)}</span>
               </div>
               {shipping > 0 && (
                 <p className="text-xs text-gray-400">Add {fmt(499 - subtotal)} more for free shipping</p>
               )}
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>GST (18%)</span>
+                <span>Additional checkout tax</span>
                 <span>{fmt(tax)}</span>
               </div>
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between font-bold text-gray-900 dark:text-white text-base">
@@ -132,7 +132,7 @@ export default function Cart() {
               onClick={() => navigate('/checkout')}
               className="btn-primary w-full btn-lg mt-6"
             >
-              Proceed to Checkout
+              Reserve for pickup
             </button>
 
             <Link to="/products" className="block text-center text-sm text-primary-600 dark:text-primary-400 hover:underline mt-4">
@@ -142,8 +142,8 @@ export default function Cart() {
             {/* Trust badges */}
             <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-around text-xs text-gray-400 text-center">
               <div>🔒<br/>Secure</div>
-              <div>↩️<br/>30-Day Returns</div>
-              <div>🚀<br/>Fast Delivery</div>
+              <div>↩️<br/>Pay at shop</div>
+              <div>🚀<br/>Local pickup</div>
             </div>
           </div>
         </div>

@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function Login() {
-  const { login } = useAuth();
+export default function Login({ adminMode = false }) {
+  const { login, logout, isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const navigate   = useNavigate();
   const location   = useLocation();
-  const from       = location.state?.from?.pathname || '/';
+  const from       = location.state?.from?.pathname;
 
   const [form, setForm]       = useState({ email: '', password: '' });
   const [errors, setErrors]   = useState({});
@@ -35,14 +35,29 @@ export default function Login() {
     if (!validate()) return;
     setLoading(true);
     try {
-      await login(form);
-      navigate(from, { replace: true });
+      const data = await login(form);
+      if (adminMode && data.user.role !== 'admin') {
+        await logout();
+        setApiError('This account does not have administrator access.');
+        return;
+      }
+      navigate(from || (data.user.role === 'admin' ? '/admin' : data.user.role === 'seller' ? '/seller' : '/'), { replace: true });
     } catch (err) {
       setApiError(err.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
   };
+
+  if (adminMode && authLoading) return <p className="container-custom py-16">Loading…</p>;
+  if (adminMode && isAdmin) return <Navigate to={from || '/admin'} replace />;
+  if (adminMode && isAuthenticated) return (
+    <div className="container-custom py-16 text-center">
+      <h1 className="page-title">Switch to an admin account</h1>
+      <p className="my-4 text-gray-500">Sign out of your customer account to access store management.</p>
+      <button onClick={logout} className="btn-primary">Sign out</button>
+    </div>
+  );
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 animate-fade-in">
@@ -57,13 +72,13 @@ export default function Login() {
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">Cloud<span className="text-primary-600">Cart</span></span>
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome back</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Sign in to your account</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{adminMode ? 'Admin sign in' : 'Welcome back'}</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{adminMode ? 'Manage your products, orders, and customers' : 'Sign in to your account'}</p>
           </div>
 
           {/* API Error */}
           {apiError && (
-            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-red-700 dark:text-red-400 text-sm animate-fade-in">
+            <div role="alert" className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-red-700 dark:text-red-400 text-sm animate-fade-in">
               <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
@@ -126,20 +141,21 @@ export default function Login() {
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>
                   Signing in…
                 </span>
-              ) : 'Sign In'}
+              ) : adminMode ? 'Sign in to Admin' : 'Sign In'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+          {!adminMode && <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
             Don't have an account?{' '}
-            <Link to="/register" className="text-primary-600 dark:text-primary-400 font-medium hover:underline">
+            <Link to="/register" state={location.state} className="text-primary-600 dark:text-primary-400 font-medium hover:underline">
               Create one free
             </Link>
-          </p>
+          </p>}
+          {adminMode && <Link to="/login" className="block mt-6 text-center text-sm text-primary-600 dark:text-primary-400">Customer sign in</Link>}
 
           {/* Demo credentials hint */}
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-xs text-blue-700 dark:text-blue-300">
-            <strong>Demo Admin:</strong> admin@cloudcart.com / Admin@1234
+            {adminMode ? <><strong>Demo admin:</strong> admin@cloudcart.com / Admin@1234</> : <><strong>Demo seller:</strong> seller@cloudcart.com / Seller@1234</>}
           </div>
         </div>
       </div>

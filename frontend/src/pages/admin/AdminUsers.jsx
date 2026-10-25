@@ -74,7 +74,7 @@ export default function AdminUsers() {
           placeholder="Search by name or email..." className="input max-w-sm"/>
         <select value={roleFilter} onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }} className="input w-auto">
           <option value="">All Roles</option>
-          <option value="user">Customers</option>
+          <option value="user">Customers</option><option value="seller">Sellers</option>
           <option value="admin">Admins</option>
         </select>
       </div>
@@ -107,7 +107,7 @@ export default function AdminUsers() {
                       <td className="px-5 py-3 text-xs text-gray-500">{user.email}</td>
                       <td className="px-5 py-3">
                         <span className={`badge ${user.role === 'admin' ? 'badge-blue' : 'badge-gray'}`}>
-                          {user.role === 'admin' ? '👑 Admin' : '👤 User'}
+                          {user.role === 'admin' ? 'Admin' : user.role === 'seller' ? 'Seller' : 'Customer'}
                         </span>
                       </td>
                       <td className="px-5 py-3">

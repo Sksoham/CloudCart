@@ -6,7 +6,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_URL = 'http://3.89.2.214:5000';
+const API_URL = (process.env.REACT_APP_API_URL || '').replace(/\/$/, '');
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   withCredentials: true, // send httpOnly cookies automatically
