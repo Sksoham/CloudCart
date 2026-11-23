@@ -398,6 +398,7 @@ Demo sellers (password `Seller@1234`, unless overridden when first seeded):
 | seller@cloudcart.com | Neighbourhood Essentials | Kothrud, Pune |
 | techseller@cloudcart.com | Corner Tech & Books | Shivajinagar, Pune |
 | styleseller@cloudcart.com | The Local Lifestyle Store | Baner, Pune |
+| electronics@cloudcart.com | Pixel Point Mobiles & Laptops | Aundh, Pune |
 
 These shops have sample addresses and are visibly labelled Demo. They are not real
 businesses. Register a customer account to demonstrate ordering. To demonstrate
@@ -424,3 +425,8 @@ Location discovery uses typed area/city names rather than GPS distance. Product
 photos are entered as URLs. Production work still includes verified sellers,
 secure deployment credentials, and transaction/recovery handling across database
 writes if a process fails during checkout or cancellation.
+
+Pixel Point has six real-model demo listings (three phones and three laptops), each
+with a sample price and a matching locally hosted catalogue photograph. Image sources
+are recorded in `frontend/public/images/electronics-photo-credits.json`. These listings belong only to Pixel Point;
+seeding preserves existing Corner Tech & Books products and all other shop records.

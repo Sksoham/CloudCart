@@ -3,123 +3,32 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import StarRating from './StarRating';
 
-const formatPrice = (n) =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
-
-const CartIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-9H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-  </svg>
-);
-
+const price = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
 export default function ProductCard({ product }) {
   const { addToCart, isInCart } = useCart();
-  const [adding, setAdding]     = useState(false);
-  const [imgErr, setImgErr]     = useState(false);
-
-  const discountPercent = product.discountPrice
-    ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
-    : null;
-
-  const handleAddToCart = async (e) => {
-    e.preventDefault(); // prevent navigating to product detail
-    setAdding(true);
-    await addToCart(product._id, 1);
-    setAdding(false);
-  };
-
-  const alreadyInCart = isInCart(product._id);
-
-  return (
-    <article className="group product-card">
-      <div className="card-hover flex flex-col h-full">
-
-        {/* Image container */}
-        <div className="relative aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden">
-          <Link to={`/products/${product._id}`} className="block h-full" tabIndex={-1} aria-hidden="true"><img
-            src={imgErr ? '/images/product-placeholder.svg' : product.image}
-            alt={product.title}
-            onError={() => setImgErr(true)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          /></Link>
-
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {discountPercent && (
-              <span className="badge badge-red text-xs">{discountPercent}% OFF</span>
-            )}
-            {product.stock === 0 && (
-              <span className="badge badge-gray text-xs">Out of Stock</span>
-            )}
-          </div>
-
-
-        </div>
-
-        {/* Info */}
-        <div className="p-4 flex flex-col flex-1 gap-1">
-          <span className="text-xs text-primary-600 dark:text-primary-400 font-medium uppercase tracking-wide">
-            {product.category}
-          </span>
-
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug">
-            <Link to={`/products/${product._id}`}>{product.title}</Link>
-          </h3>
-
-          {product.brand && product.brand !== 'Generic' && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">{product.brand}</p>
-          )}
-
-          {product.shop && <p className="text-xs text-primary-600 mt-2">{product.shop.name} · {product.shop.area}</p>}
-          <p className="text-xs text-gray-500">Collect in store · Pay at pickup</p>
-          {product.numReviews > 0 && <StarRating rating={product.ratings} numReviews={product.numReviews} />}
-
-          {/* Price */}
-          <div className="flex items-baseline gap-2 mt-auto pt-2">
-            <span className="text-base font-bold text-gray-900 dark:text-white">
-              {formatPrice(product.discountPrice ?? product.price)}
-            </span>
-            {product.discountPrice && (
-              <span className="text-xs text-gray-400 line-through">
-                {formatPrice(product.price)}
-              </span>
-            )}
-          </div>
-
-          {/* Stock warning */}
-          {product.stock > 0 && product.stock <= 5 && (
-            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-              Only {product.stock} left!
-            </p>
-          )}
-          {/* Keep the purchase action separate from the product link. */}
-          <div className="product-add mt-4">
-            <button
-              onClick={handleAddToCart}
-              disabled={adding || product.stock === 0 || alreadyInCart}
-              className={`w-full btn text-sm py-2.5 ${
-                alreadyInCart
-                  ? 'bg-green-600 text-white cursor-default'
-                  : 'btn-primary'
-              }`}
-            >
-              {adding ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Adding…
-                </span>
-              ) : alreadyInCart ? (
-                '✓ In Cart'
-              ) : (
-                <span className="flex items-center gap-2">
-                  <CartIcon /> Add to Cart
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
+  const [adding, setAdding] = useState(false);
+  const [imgErr, setImgErr] = useState(false);
+  const inCart = isInCart(product._id);
+  const discounted = product.discountPrice != null && product.discountPrice < product.price;
+  const add = async () => { setAdding(true); try { await addToCart(product._id, 1); } finally { setAdding(false); } };
+  return <article className="product-card shop-product">
+    <div className="product-media">
+      <Link to={`/products/${product._id}`} tabIndex={-1} aria-hidden="true"><img src={imgErr || !product.image ? '/images/product-placeholder.svg' : product.image} alt={product.title} onError={() => setImgErr(true)} loading="lazy" /></Link>
+      <span className="product-category">{product.category}</span>
+      {discounted && <span className="product-discount">{Math.round((1 - product.discountPrice / product.price) * 100)}% off</span>}
+      {product.stock === 0 && <span className="product-unavailable">Out of stock</span>}
+    </div>
+    <div className="product-caption">
+      <h3><Link to={`/products/${product._id}`}>{product.title}</Link></h3>
+      {product.shop && <p className="product-shop">{product.shop.name}<span>{product.shop.area}</span></p>}
+      {product.numReviews > 0 && <StarRating rating={product.ratings} numReviews={product.numReviews} />}
+      <div className="product-purchase">
+        <div><strong>{price(product.discountPrice ?? product.price)}</strong>{discounted && <del>{price(product.price)}</del>}</div>
+        <button onClick={add} disabled={adding || inCart || product.stock === 0} aria-label={inCart ? `${product.title} is in cart` : `Add ${product.title} to cart`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2M9 13h6m-3-3v6"/></svg>{adding ? 'Adding…' : inCart ? 'Added' : 'Add'}
+        </button>
       </div>
-    </article>
-  );
+      <p className="product-pickup">{product.stock > 0 && product.stock <= 5 ? `Only ${product.stock} left · ` : ''}Pay at pickup</p>
+    </div>
+  </article>;
 }

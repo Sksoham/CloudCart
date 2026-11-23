@@ -1,0 +1,38 @@
+[
+  {
+    "file": "electronics-123.webp",
+    "title": "iPhone 13 Pro",
+    "source": "https://dummyjson.com/products/123",
+    "image": "https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/1.webp"
+  },
+  {
+    "file": "electronics-133.webp",
+    "title": "Samsung Galaxy S10",
+    "source": "https://dummyjson.com/products/133",
+    "image": "https://cdn.dummyjson.com/product-images/smartphones/samsung-galaxy-s10/1.webp"
+  },
+  {
+    "file": "electronics-126.webp",
+    "title": "Oppo F19 Pro Plus",
+    "source": "https://dummyjson.com/products/126",
+    "image": "https://cdn.dummyjson.com/product-images/smartphones/oppo-f19-pro-plus/1.webp"
+  },
+  {
+    "file": "electronics-78.webp",
+    "title": "Apple MacBook Pro 14 Inch Space Grey",
+    "source": "https://dummyjson.com/products/78",
+    "image": "https://cdn.dummyjson.com/product-images/laptops/apple-macbook-pro-14-inch-space-grey/1.webp"
+  },
+  {
+    "file": "electronics-79.webp",
+    "title": "Asus Zenbook Pro Dual Screen Laptop",
+    "source": "https://dummyjson.com/products/79",
+    "image": "https://cdn.dummyjson.com/product-images/laptops/asus-zenbook-pro-dual-screen-laptop/1.webp"
+  },
+  {
+    "file": "electronics-82.webp",
+    "title": "New DELL XPS 13 9300 Laptop",
+    "source": "https://dummyjson.com/products/82",
+    "image": "https://cdn.dummyjson.com/product-images/laptops/new-dell-xps-13-9300-laptop/1.webp"
+  }
+]

@@ -68,7 +68,7 @@ export default function Navbar() {
 
           {/* ── Logo ── */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+            <div className="brand-mark w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">CC</span>
             </div>
             <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -103,6 +103,8 @@ export default function Navbar() {
               onClick={toggleTheme}
               className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
               aria-label="Toggle dark mode"
+              aria-pressed={isDark}
+              title={isDark ? "Switch to white theme" : "Switch to black theme"}
             >
               {isDark ? <SunIcon /> : <MoonIcon />}
             </button>
